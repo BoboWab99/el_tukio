@@ -1,3 +1,54 @@
+// fill offcanvas given task data
+function fillOffcanvas(task) {
+    modalTask.value = task.task;
+    modalDueDate.value = task.due_date;
+
+    if (task.completed) {
+        modalCheck.checked = true;
+        modalCompletedBy.innerHTML = `${task.completed_by_fname} ${task.completed_by_lname}`;
+        modalDateCompleted.innerHTML = formatDate(task.date_completed);
+        modalCompletedBy.parentElement.hidden = false;
+    } else {
+        modalCheck.checked = false;
+        modalCompletedBy.innerHTML = '';
+        modalDateCompleted.innerHTML = '';
+        modalCompletedBy.parentElement.hidden = true;
+    }
+    
+    modalCheck.setAttribute('onchange', `changeTaskStatus(${task.id}, true)`)
+    modalCreatedBy.innerHTML = `${task.created_by_fname} ${task.created_by_lname}`;
+    modalDateCreated.innerHTML = formatDate(task.date_created);
+    taskCtUpdateForm.setAttribute('data-task-id', task.id);
+    taskDdUpdateForm.setAttribute('data-task-id', task.id);
+    modalDeleteTask.setAttribute('onclick', `deleteTask(${task.id})`);
+
+    if (task.assigned_to_fname) {
+        let fullName = `${task.assigned_to_fname} ${task.assigned_to_lname}`;
+        const assignToTxt = `
+        <span class="d-block text-muted">Assigned to:</span>
+        <div class="d-flex justify-content-between gap-md">
+            <div class="d-block" id="date_created">
+                <p class="mb-0">${fullName}<span class="ms-1 hint">${task.assigned_to_business}</span></p>
+                <a href="#" class="btn btn-outline-success border-0 py-1 px-2">
+                    <i class="fa-solid fa-message"></i>
+                </a>
+                <a href="tel:#" class="btn btn-outline-primary border-0 py-1 px-2">
+                    <i class="fa-solid fa-phone"></i>
+                </a>
+            </div>
+            <button type="button" class="btn-close" title="Remove" onclick="assignTaskToRemove(${task.id})"></button>
+        </div>`;
+        assignedToElm.innerHTML = assignToTxt;
+    } else {
+        const assignToTxt = `
+        <a href="#" class="d-block" data-bs-toggle="modal" data-bs-target="#assignTaskModal">
+            <i class="fa-solid fa-user-plus"></i>
+            <span class="ms-2" id="assign_to">Assign to</span>
+        </a>`;
+        assignedToElm.innerHTML = assignToTxt;
+    }
+}
+
 // new HTML task element
 function createTaskElm(task) {
     let taskDueDate = '';

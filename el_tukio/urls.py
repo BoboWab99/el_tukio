@@ -50,11 +50,13 @@ urlpatterns += [
         path('events/<int:event_id>/update/', organizer.event_update, name='organizer-event-update'),
         path('events/<int:event_id>/team/', organizer.event_team, name='organizer-event-team'),
         path('events/<int:event_id>/tasks/', organizer.tasks, name='organizer-event-tasks'),
-        path('events/<int:event_id>/tasks?group=<group_id>/', organizer.tasks, name='organizer-event-tasks'),
-        path('tasks/<task_id>/details/', organizer.task_details, name='task-details'),
-        path('tasks/<task_id>/complete/', organizer.complete_task, name='complete-task'),
+        path('events/<int:event_id>/tasks?group=<int:group_id>/', organizer.tasks, name='organizer-event-tasks'),
+        path('tasks/<int:task_id>/details/', organizer.task_details, name='task-details'),
+        path('tasks/<int:task_id>/complete/', organizer.complete_task, name='complete-task'),
         # path('tasks/<task_id>/update/', organizer.update_task, name='update-task'),
-        path('tasks/<task_id>/delete/', organizer.delete_task, name='delete-task'),
+        path('tasks/<int:task_id>/delete/', organizer.delete_task, name='delete-task'),
+        path('tasks/<int:task_id>/assign/<int:member_id>/', organizer.assign_to, name='assign-to'),
+        path('tasks/<int:task_id>/assign/remove/', organizer.assign_to_remove, name='assign-to-remove'),
     ]))
 ]
 

@@ -47,15 +47,15 @@
             <div class="card shadow-sm mb-2" data-task-id="{{ task.id }}">
                 <div class="card-body d-flex gap-lg">
                     <span class="pt-1">
-                        <input type="checkbox" class="form-check-input rounded-circle" onchange="changeTaskStatus(this.closest('[data-task-id]').dataset.taskId)" {% if task.completed %}checked{% endif %}>
+                        <input type="checkbox" class="form-check-input rounded-circle" onchange="changeTaskStatus({{ task.id }})" {% if task.completed %}checked{% endif %}>
                     </span>
-                    <div class="flex-grow-1" onclick="taskDetails(this.closest('[data-task-id]').dataset.taskId)">
+                    <div class="flex-grow-1" onclick="taskDetails({{ task.id }})">
                         <p class="mb-0" data-value="task">{{ task.task }}</p>
                         <div class="d-flex gap-md">
                             {% if task.due_date %}
                             <span class="text-primary">
                                 <i class="fa-regular fa-calendar"></i>
-                                <span data-value="due-date">{{ task.due_date }}</span>
+                                <span data-value="due-date">{{ task.due_date|date:"d/m/Y" }}</span>
                             </span>
                             {% endif %}
                             {% if active_group == 'all' %}
@@ -139,6 +139,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="assignTaskModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="assignTaskModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-white">
+                <h5 class="modal-title" id="assignTaskModalTitle">Assign To:</h5>
+            </div>
+            <div class="modal-body">
+                {% for member in event_team %}
+                <a role="button" class="btn btn-outline-primary d-block mb-2" onclick="assignTaskTo({{ member.id }})">
+                    {{ member.full_name }}
+                    {% if member.is_vendor %}
+                    <span class="hint">{{ member.vendor.business_name }}</span>
+                    {% endif %}
+                </a>                
+                {% endfor %}
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="my-0 btn btn-outline-dark border-0" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="offcanvas offcanvas-end text-start" tabindex="-1" id="offcanvasTask" aria-labelledby="offcanvasTaskLabel">
     <div class="offcanvas-header border-bottom">
         <h5 class="offcanvas-title" id="offcanvasTaskLabel">Task details</h5>
@@ -171,13 +195,15 @@
         <div class="card-body bg-white shadow-sm border-bottom mb-2">
             <span class="d-block text-muted">Created by</span>
             <span class="d-block" id="created_by"></span>
+            <small class="d-block" id="date_created"></small>
         </div>
-        <div class="card-body bg-white shadow-sm border-bottom mb-2">
-            <span class="d-block text-muted">Date created</span>
-            <span class="d-block" id="date_created"></span>
+        <div class="card-body bg-white shadow-sm border-bottom mb-2" hidden>
+            <span class="d-block text-muted">Completed by</span>
+            <span class="d-block" id="completed_by"></span>
+            <small class="d-block" id="date_completed"></small>
         </div>
-        <div class="card-body bg-white shadow-sm border-bottom mb-2">
-            <a href="#" class="d-block">
+        <div class="card-body bg-white shadow-sm border-bottom mb-2" id="assignedTo">
+            <a href="#" class="d-block" data-bs-toggle="modal" data-bs-target="#assignTaskModal">
                 <i class="fa-solid fa-user-plus"></i>
                 <span class="ms-2" id="assign_to">Assign to</span>
             </a>

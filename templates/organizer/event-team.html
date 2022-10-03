@@ -23,7 +23,7 @@
         <tr>
             <td>
                 {{ member.full_name }}
-                {% if member.vendor.business_name %}
+                {% if member.is_vendor %}
                 <span class="text-muted">[{{ member.vendor.business_name }}]</span>
                 {% endif %}
             </td>

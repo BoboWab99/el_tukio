@@ -10,23 +10,28 @@ const modalDueDate = document.getElementById('id_task_u_form-due_date');
 const modalCheck = document.getElementById('id_completed');
 const modalCreatedBy = document.getElementById('created_by');
 const modalDateCreated = document.getElementById('date_created');
+const modalCompletedBy = document.getElementById('completed_by');
+const modalDateCompleted = document.getElementById('date_completed');
 const modalDeleteTask = document.getElementById('deleteTask');
+const assignedToElm = document.getElementById('assignedTo');
 
 
-// window.addEventListener('DOMContentLoaded', () => {
-//     // https://stackoverflow.com/questions/23593052/format-javascript-date-as-yyyy-mm-dd
-//     let today = new Date();
-//     const offset = today.getTimezoneOffset();
-//     today = new Date(today.getTime() - (offset * 60 * 1000));
-//     today = today.toISOString().split('T')[0];
+/*
+window.addEventListener('DOMContentLoaded', () => {
+    // https://stackoverflow.com/questions/23593052/format-javascript-date-as-yyyy-mm-dd
+    let today = new Date();
+    const offset = today.getTimezoneOffset();
+    today = new Date(today.getTime() - (offset * 60 * 1000));
+    today = today.toISOString().split('T')[0];
 
-//     let eventDate = document.getElementById('_eventDate').value;
-//     eventDate = new Date(eventDate).toISOString().split('T')[0];
-//     modalDueDate.setAttribute('min', today);
-//     modalDueDate.setAttribute('max', eventDate);
+    let eventDate = document.getElementById('_eventDate').value;
+    eventDate = new Date(eventDate).toISOString().split('T')[0];
+    modalDueDate.setAttribute('min', today);
+    modalDueDate.setAttribute('max', eventDate);
 
-//     // console.log(window.location.pathname);
-// });
+    // console.log(window.location.pathname);
+});
+*/
 
 let orgTask = null;
 let orgDueDate = null;
@@ -60,6 +65,7 @@ offcanvas.addEventListener('hidden.bs.offcanvas', () => {
     modalDueDate.removeEventListener('change', listenToDateChange);
 });
 
+/*
 newTaskForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const url = window.location.pathname;
@@ -74,6 +80,7 @@ newTaskForm.addEventListener('submit', (e) => {
     const task = loadFormData(formData);
     _fetch(url, callback, 'POST', task);
 });
+*/
 
 [taskCtUpdateForm, taskDdUpdateForm].forEach(form => {
     form.addEventListener('submit', (e) => {
@@ -91,6 +98,7 @@ newTaskForm.addEventListener('submit', (e) => {
     });
 });
 
+/*
 newTaskGroupForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const url = window.location.pathname;
@@ -102,21 +110,13 @@ newTaskGroupForm.addEventListener('submit', (e) => {
     const taskGroup = loadFormData(formData);
     _fetch(url, callback, 'POST', taskGroup);
 });
+*/
 
 async function taskDetails(taskId) {
     const url = `/organizer/tasks/${taskId}/details/`;
     const callback = async (task) => {
-        modalTask.value = task.task;
-        modalDueDate.value = task.due_date;
-        if (task.completed) modalCheck.checked = true;
-        else modalCheck.checked = false;
-        modalCheck.setAttribute('onchange', `changeTaskStatus(${task.id}, true)`)
-        modalCreatedBy.innerHTML = `${task.created_by_fname} ${task.created_by_lname}`;
-        modalDateCreated.innerHTML = formatDate(task.date_created);
-        taskCtUpdateForm.setAttribute('data-task-id', taskId);
-        taskDdUpdateForm.setAttribute('data-task-id', taskId);
-        modalDeleteTask.setAttribute('onclick', `deleteTask(${taskId})`);
-        showBSPopup('offcanvasTask');
+        fillOffcanvas(task);
+        if (!offcanvas.classList.contains('show')) showBSPopup('offcanvasTask');
     }
     _fetch(url, callback);
 }
@@ -125,10 +125,31 @@ async function changeTaskStatus(taskId, fromModal = false) {
     const url = `/organizer/tasks/${taskId}/complete/`;
     const callback = async (msg) => {
         notifyAutoHide(msg.content, msg.tag);
+        taskDetails(taskId);
         if (fromModal) {
             taskStatusChanged = true;
             updateTaskUI(taskId);
         }
+    }
+    _fetch(url, callback);
+}
+
+async function assignTaskTo(memberId) {
+    const taskId = taskCtUpdateForm.dataset.taskId;
+    const url = `/organizer/tasks/${taskId}/assign/${memberId}`;
+    const callback = async (msg) => {
+        notifyAutoHide(msg.content, msg.tag);
+        taskDetails(taskId);
+        hideBSPopup('assignTaskModal');
+    }
+    _fetch(url, callback);
+}
+
+async function assignTaskToRemove(taskId) {
+    const url = `/organizer/tasks/${taskId}/assign/remove/`;
+    const callback = async (msg) => {
+        notifyAutoHide(msg.content, msg.tag);
+        taskDetails(taskId);
     }
     _fetch(url, callback);
 }
@@ -152,7 +173,7 @@ function updateTaskUI(taskId) {
     }
     if (taskDdChanged) {
         const valueDueDate = taskElm.querySelector('[data-value="due-date"]');
-        valueDueDate.innerHTML = modalDueDate.value;
+        valueDueDate.innerHTML = formatDate(modalDueDate.value);
     }
     if (taskStatusChanged) {
         const checkbox = taskElm.querySelector('input[type="checkbox"]');
