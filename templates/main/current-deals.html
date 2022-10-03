@@ -1,0 +1,100 @@
+{% extends 'layouts/dashboard.html' %}
+
+{% block content %}
+<nav class="nav-secondary d-flex justify-content-evenly border-bottom bg-light mb-5">
+    <a href="{% url 'current-deals' status='pending' %}"
+        class="nav-link {% if active == 'pending' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-file-circle-plus"></i>
+        <span class="ms-1">New</span>
+    </a>
+    <a href="{% url 'current-deals' status='accepted' %}"
+        class="nav-link {% if active == 'accepted' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-sun"></i>
+        <span class="ms-1">Active</span>
+    </a>
+    <a href="{% url 'current-deals' status='declined' %}"
+        class="nav-link {% if active == 'declined' %}text-success{% endif %}">
+        <i class="fa-solid fa-arrow-trend-down"></i>
+        <span class="ms-1">Declined</span>
+    </a>
+</nav>
+
+<h2 class="mb-5">My Current deals</h2>
+<div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center">
+    {% for deal in mydeals %}
+    <div class="col">
+        <a href="#" class="card shadow">
+            <div class="card-body p-5">
+                <span class="d-block h4 mb-1">{{ deal.event.event_name }}</span>
+                <span class="d-block text-muted">{{ deal.event.event_date }}</span>
+                <span class="d-block text-muted">Organizer: {{ deal.event.organizer }}</span>
+                <span class="d-block text-muted">Status: {{ deal.get_status_display }}</span>
+                <span class="d-block text-muted">Terms: {{ deal.terms }}</span>
+                <span class="d-block text-muted">Sent: {{ deal.date_sent }}</span>
+                <span class="d-block text-muted">By: {{ deal.contractor }}</span>
+                <span class="d-block text-muted">Signed: {{ deal.date_signed }}</span>
+                <span class="d-block text-muted">By: {{ deal.contractee }}</span>
+                {% if deal.get_status_display.lower == 'pending' %}
+                <div class="d-flex justify-content-center gap-sm pt-2">
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                        data-bs-target="#signContractModal" data-action="decline" data-deal="{{ deal.id }}">
+                        Decline
+                    </button>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                        data-bs-target="#signContractModal" data-action="accept" data-deal="{{ deal.id }}">
+                        Accept offer
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}
+
+{% block modals %}
+<div class="modal fade" id="signContractModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="signContractModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body">
+                <span class="fs-1 text-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </span>
+                <p class="my-3">I understand to requirements of this deal. <br>I choose to <span id="choice" class="bg-light px-1 text-uppercase rounded">...</span> it.</p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="my-0 btn btn-outline-dark border-0" data-bs-dismiss="modal">Close</button>
+                <a role="button" href="#" class="my-0 btn btn-primary" id="submitBtn">Accept</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock modals %}
+
+{% block scripts %}
+<script>
+    const choice = document.getElementById('choice');
+    const submitBtn = document.getElementById('submitBtn');
+
+    document.querySelectorAll('[data-action="decline"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            choice.innerHTML = 'decline';
+            choice.classList.remove('text-success');
+            choice.classList.add('text-danger');
+            submitBtn.innerHTML = 'Decline Offer';
+            submitBtn.setAttribute('href', `/my/deals/sign/${btn.dataset.deal}/decline/`);
+        });
+    });    
+    document.querySelectorAll('[data-action="accept"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            choice.innerHTML = 'accept';
+            choice.classList.remove('text-danger');
+            choice.classList.add('text-success');
+            submitBtn.innerHTML = 'Accept Offer';
+            submitBtn.setAttribute('href', `/my/deals/sign/${btn.dataset.deal}/accept/`);
+        });
+    });
+</script>
+{% endblock scripts %}

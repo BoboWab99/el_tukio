@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Update Business profile {% endblock %}
+
+{% block body %}
+<h4 class="mb-5">Update Business profile</h4>
+<form action="{{ request.path_info }}" class="mb-5" method="POST" novalidate>
+    {% csrf_token %}
+    {% for field in form.visible_fields %}
+    <div class="form-group mb-3">
+        {{ field.label_tag }}
+        {% if field.field.widget.input_type == 'select' %}
+        {% render_field field class+="form-select" %}
+    
+        {% elif field.field.widget.input_type == 'radio' %}
+        {% render_field field class+="form-check-input" %}
+        
+        {% elif field.field.widget.input_type == 'checkbox' %}
+        {% render_field field class+="form-check-input" %}
+    
+        {% elif field.field.widget.input_type == 'range' %}
+        {% render_field field class+="form-range" %}
+    
+        {% else %}
+        {% render_field field class+="form-control" %}
+        {% endif %}
+    
+        {% for error in field.errors %}
+        <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary mt-3">Save</button>
+</form>
+{% endblock body %}

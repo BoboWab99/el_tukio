@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %} {{ title }} {% endblock %}
+
+{% block body %}
+<h4 class="mb-5">{{ title }}</h4>
+<form action="{{ request.path_info }}" class="mb-5" method="POST" novalidate>
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary mt-3">Save</button>
+</form>
+{% endblock body %}

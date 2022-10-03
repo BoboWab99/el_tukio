@@ -1,0 +1,51 @@
+{% extends 'layouts/dashboard.html' %}
+
+{% block content %}
+{% include 'components/nav-event.html' %}
+
+<h2 class="mb-5">My event team</h2>
+
+<table class="table text-start">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Service</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ user.full_name }} <span class="bg-light text-success fw-bold rounded px-2">ME</span></td>
+            <td>{{ user.get_user_type_display }}</td>
+            <td>...</td>
+        </tr>
+        {% for member in team %}
+        <tr>
+            <td>
+                {{ member.full_name }}
+                {% if member.vendor.business_name %}
+                <span class="text-muted">[{{ member.vendor.business_name }}]</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if member.is_planner %}
+                {{ member.get_user_type_display }}
+                {% else %}
+                {{ member.vendor.category }}
+                {% endif %}
+            </td>
+            <td>
+                <a href="#" class="btn btn-outline-success border-0">
+                    <i class="fa-solid fa-message"></i>
+                </a>
+                {% if member.phone_number %}
+                <a href="tel:+{{ member.phone_number }}" class="btn btn-outline-primary border-0">
+                    <i class="fa-solid fa-phone"></i>
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} ElTukio | Home {% endblock title %}
+
+{% block body %}
+{% include 'components/header.html' %}
+
+<h1 class="mb-1">ElTukio</h1>
+<h5 class="mb-5 text-muted">Your Event Planning Assistant</h5>
+<a href="{% url 'register' %}" class="btn btn-primary w-50 mb-3">Register</a>
+<a href="{% url 'login' %}" class="btn btn-success w-50 mb-3">Login</a>
+{% endblock body %}

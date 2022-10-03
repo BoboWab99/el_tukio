@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %} Bookmarks {% endblock %}
+
+{% block body %}
+{% include 'components/header.html' %}
+
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4">
+    {% for seller in bookmarks %}
+    <div class="col">
+        <div class="card h-100">
+            <img src="{{ seller.user.profile.url }}" class="rounded m-1" alt="profile">
+            <div class="card-body">
+                <div class="fs-6"><strong>
+                    {% if seller.user.is_vendor %}
+                    {{ seller.business_name }}
+                    {% else %}
+                    {{ seller.user.full_name }}
+                    {% endif %}
+                </strong></div>
+                <div class="rating">
+                    <span class="text-warning"><i class="fas fa-star"></i></span>
+                    <span class="num">4.5 - 5 reviews</span>
+                </div>
+                <div class="card-subtitle text-muted">{{ seller.location }} - {{ seller.city }}</div>
+                <small class="btn-secondary rounded px-2">
+                    {% if seller.user.is_vendor %}
+                    {{ seller.category.name }}
+                    {% else %}
+                    {{ seller.user.get_user_type_display }}
+                    {% endif %}
+                </small>
+                <div class="d-flex justify-content-evenly mt-3">
+                    {% if seller.user.is_vendor %}
+                    <a href="{% url 'vendor-details' vendor_id=seller.user_id %}" class="card-link">
+                        View more
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'planner-details' planner_id=seller.user_id %}" class="card-link">
+                        View more
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'remove-bookmark' user_id=seller.user_id %}" class="card-link text-success">
+                        <i class="fa-solid fa-heart"></i>
+                        Saved
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock body %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} ElTukio | MyDashboard {% endblock title %}
+
+{% block body %}
+<div class="layout layout-dashboard">
+    {% include 'components/header.html' %}
+    <div class="row row-cols-2">
+        <div class="col-2">
+            {% if user.is_vendor %}
+            {% include 'components/nav-vendor.html' %}
+            {% elif user.is_planner %}
+            {% include 'components/nav-planner.html' %}
+            {% elif user.is_organizer %}
+            {% include 'components/nav-organizer.html' %}
+            {% endif %}
+        </div>
+        <div class="col-10">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block modals %} {% endblock %}
+
+{% block scripts %} {% endblock %}

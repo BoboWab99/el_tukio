@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Event update {% endblock %}
+
+{% block body %}
+<h4 class="mb-4">Event update</h4>
+
+<form action="{{ request.path_info }}" method="POST">
+    {% csrf_token %}
+    
+    {% for field in form.visible_fields %}
+    <div class="form-field mb-3">
+        <div class="form-label d-flex align-items-end">
+            {{ field.label_tag }}
+            {% if field.help_text %}
+            <small class="help-text text-muted ms-2">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+        {% render_field field class+="form-control"%}
+        {% for error in field.erros %}
+        <span class="text-end">{{ error }}</span>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button class="btn btn-primary">Update</button>
+</form>
+
+{% endblock body %}

@@ -1,0 +1,26 @@
+<header class="header border-bottom d-flex align-items-center justify-content-between mb-2" id="header">
+    <a href="{% url 'home' %}" class="logo">ElTukio</a>
+    <nav class="nav-main d-flex align-items-center">
+        <a href="#" class="nav-link">Planning Tools</a>
+        <a href="{% url 'vendors' %}" class="nav-link">Vendors</a>
+        <a href="{% url 'planners' %}" class="nav-link">Event Planners</a>
+        {% if user.is_organizer or user.is_planner %}
+        <a href="{% url 'bookmarks' user_type=user.get_user_type_display.lower %}" class="nav-link">Favorites</a>
+        {% endif %}
+    </nav>
+    <nav class="nav-profile d-flex align-items-center">
+        {% if user.is_authenticated %}
+        {% if user.is_vendor %}
+        <a class="nav-link fw-bold" href="{% url 'vendor-dashboard' %}">{{ user.vendor.business_name }}</a>
+        {% elif user.is_planner %}
+        <a class="nav-link fw-bold" href="{% url 'planner-dashboard' %}">{{ user.full_name }}</a>
+        {% elif user.is_organizer %}
+        <a class="nav-link fw-bold" href="{% url 'organizer-dashboard' %}">{{ user.full_name }}</a>
+        {% endif %}
+        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a class="nav-link" href="{% url 'login' %}">Login</a>
+        <a class="nav-link" href="{% url 'register' %}">Register</a>
+        {% endif %}
+    </nav>
+</header>

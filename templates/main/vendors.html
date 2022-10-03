@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %} ElTukio | Vendors {% endblock %}
+
+{% block body %}
+{% include 'components/header.html' %}
+
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4">
+    {% for vendor in vendors %}
+    <div class="col">
+        <div class="card h-100">
+            <img src="{{ vendor.user.profile.url }}" class="rounded m-1" alt="vendor profile">
+            <div class="card-body">
+                <div class="fs-6"><strong>{{ vendor.business_name }}</strong></div>
+                <div class="rating">
+                    <span class="text-warning"><i class="fas fa-star"></i></span>
+                    <span class="num">4.5 - 5 reviews</span>
+                </div>
+                <div class="card-subtitle text-muted">{{ vendor.location }} - {{ vendor.city }}</div>
+                <small class="btn-secondary rounded px-2">{{ vendor.category.name }}</small>
+                <div class="d-flex justify-content-evenly mt-3">
+                    <a href="{% url 'vendor-details' vendor_id=vendor.user_id %}" class="card-link">
+						View more
+						<i class="fa-solid fa-chevron-right"></i>
+					</a>
+                    {% if user.is_organizer or user.is_planner %}
+                    {% if user.is_organizer and vendor.user in user.organizer.bookmarks.all or user.is_planner and vendor.user in user.planner.bookmarks.all %}
+                    <a href="{% url 'remove-bookmark' user_id=vendor.user_id %}" class="card-link text-success">
+                        <i class="fa-solid fa-heart"></i>
+                        Saved
+                    </a>
+                    {% else %}
+                    <a href="{% url 'bookmark' user_id=vendor.user_id %}" class="card-link">
+						<i class="fa-solid fa-heart"></i>
+						Save
+					</a>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+	{% endfor %}
+</div>
+{% endblock body %}

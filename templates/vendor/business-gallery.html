@@ -1,0 +1,115 @@
+{% extends 'layouts/dashboard.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="mt-5 mb-4 text-center">
+    <h5 class="mb-0">{{ user.vendor.business_name }} Gallery</h5>
+    <!-- <p class="text-muted">You can add your business images up to 5 images. Your business will NOT appear in search
+        results if you have less than 3 pictures!</p> -->
+</div>
+
+<div class="text-center">
+    <button type="button" id="upload-picture-btn" class="btn btn-primary mb-4" data-bs-toggle="modal"
+        data-bs-target="#uploadPicture">
+        <i class="fas fa-plus"></i>
+        <span class="ms-1">New Picture</span>
+    </button>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center py-3">
+        {% for img_file in gallery %}
+        <figure class="col vendor-img" data-img-id="{{ img_file.id }}">
+            <div class="d-flex align-items-end overflow-hidden" style="height: 140px;">
+                <img src="{{ img_file.image.url }}" class="d-block w-100" alt="">
+            </div>
+            <figcaption class="my-2">{{ img_file.caption }}</figcaption>
+
+            <button class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-pencil-alt"></i>
+                <span class="ms-1">Change</span>
+            </button>
+            <a href="#" class="btn btn-outline-secondary btn-sm ms-1">
+                <i class="fas fa-trash-alt"></i>
+                <span class="ms-1">Delete</span>
+            </a>
+        </figure>
+        {% endfor %}
+    </div>
+
+    <div class="mt-5 mb-4 text-center">
+        <h5 class="mb-0">Gallery Preview</h5>
+        <p class="text-muted">This is how end users view your pictures.</p>
+    </div>
+
+    <div id="carouselVendorPictures" class="carousel slide" data-bs-ride="carousel" hidden>
+        <div class="carousel-indicators">
+            {% for img_file in images %}
+            <button type="button" data-bs-target="#carouselVendorPictures"></button>
+            {% endfor %}
+        </div>
+
+        <div class="carousel-inner">
+            {% for img_file in images %}
+            <div class="carousel-item">
+                <div class="d-flex align-items-end overflow-hidden" style="height: 400px;">
+                    <img src="{{ img_file.image.url }}" class="d-block w-100" alt="...">
+                </div>
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>{{ img_file.caption }}</h5>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselVendorPictures"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselVendorPictures"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+{% endblock content %}
+
+{% block modals %}
+<div class="modal fade" id="uploadPicture" data-bs-backdrop="static" tabindex="-1" aria-labelledby="uploadPictureTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <form action="{% url 'business-gallery-upload' %}" id="uploadPictureForm" class="modal-content" method="POST" enctype='multipart/form-data'>
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadPictureTitle">Upload new business picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                {% for field in form.visible_fields %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {% render_field field class+="form-control"%}
+                    {% if field.help_text %}
+                    <span class="help-text">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% for error in field.erros %}
+                    <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary border" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Upload picture
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock modals %}

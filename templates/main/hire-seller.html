@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Hire {{ seller.user.full_name }} {{ seller.business_name }} {% endblock %}
+
+{% block body %}
+<h4>Hire {{ seller.user.full_name }} {{ seller.business_name }}</h4>
+<small class="btn-secondary rounded px-2">{{ seller.user.get_user_type_display }}</small>
+
+<form action="{{ request.path_info }}" method="POST">
+    {% csrf_token %}
+
+    {% for field in form.visible_fields %}
+    <div class="form-field mb-3">
+        {{ field.label_tag }}
+        {% render_field field class+="form-control" %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Send contract</button>
+</form>
+{% endblock body %}

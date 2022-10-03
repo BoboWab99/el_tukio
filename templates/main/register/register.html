@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} ElTukio | {{ title }} {% endblock %}
+
+{% block body %}
+<div class="container">
+	<h2 class="mb-4">{{ title }}</h2>
+
+	<form action="{{ request.path_info }}" class="mb-5" method="POST" novalidate>
+		{% csrf_token %}
+		
+		{% for field in form.visible_fields %}
+		<div class="form-group mb-3">
+			{{ field.label_tag }}
+			{% if field.field.widget.input_type == 'select' %}
+			{% render_field field class+="form-select" %}
+
+			{% elif field.field.widget.input_type == 'radio' %}
+			{% render_field field class+="form-check-input" %}
+
+			{% elif field.field.widget.input_type == 'checkbox' %}
+			{% render_field field class+="form-check-input" %}
+			
+			{% elif field.field.widget.input_type == 'range' %}
+			{% render_field field class+="form-range" %}
+
+			{% else %}
+			{% render_field field class+="form-control" %}
+			{% endif %}
+			
+			{% for error in field.errors %}
+			<span class="text-danger">{{ error }}</span>
+			{% endfor %}
+		</div>
+		{% endfor %}
+
+		<button type="submit" class="btn btn-primary w-100">Create account</button>
+	</form>
+
+	<div class="mb-4">
+		<span>Already have an account?</span>
+		<a href="{% url 'login' %}">Login</a>
+	</div>
+	<a class="btn btn-secondary" href="{% url 'home' %}">Go back Home</a>
+</div>
+
+{% endblock %}

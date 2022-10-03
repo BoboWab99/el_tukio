@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+ElTukio |
+{% if seller.user.is_vendor %}
+{{ seller.business_name }}
+{% elif seller.user.is_planner %}
+{{ seller.user.full_name }}
+{% endif %}
+{% endblock %}
+
+{% block body %}
+{% include 'components/header.html' %}
+
+<section class="intro">
+        <div class="d-flex justify-content-between align-items-end text-start py-4 mt-3">
+            {% if seller.user.is_vendor %}
+            <div>
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'vendors' %}">Vendors</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ seller.business_name }}</li>
+                    </ol>
+                </nav>
+                <h2 class="m-0">{{ seller.business_name }}</h2>
+            </div>
+            {% elif seller.user.is_planner %}
+            <div>
+                <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'planners' %}">Planners</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ seller.user.full_name }}</li>
+                    </ol>
+                </nav>
+                <h2 class="m-0">{{ seller.user.full_name }}</h2>
+            </div>
+            {% endif %}
+            <div class="cta">
+                {% if user.is_organizer or user.is_planner %}
+                {% if user.is_organizer and seller.user in user.organizer.bookmarks.all or user.is_planner and seller.user in user.planner.bookmarks.all %}
+                <a href="{% url 'remove-bookmark' user_id=seller.user_id %}" class="card-link text-success">
+                    <i class="fa-solid fa-heart"></i>
+                    Saved
+                </a>
+                {% else %}
+                <a href="{% url 'bookmark' user_id=seller.user_id %}" class="card-link">
+                    <i class="fa-solid fa-heart"></i>
+                    Save
+                </a>
+                {% endif %}
+                {% endif %}
+                <!-- <a class="btn btn-success" href="#">Request Quote</a> -->
+                <a class="btn btn-success" href="{% url 'hire-seller' user_id=seller.user_id %}">Hire me</a>
+                {% if seller.user.is_vendor %}
+                <a class="btn btn-info" href="#">Map <i class="fa-solid fa-chevron-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+</section>
+
+<main>
+    <div class="" id="vendor-details">
+        <aside class="sidebar" hidden>
+            <h5 class="text-start mb-3">On this page:</h5>
+            <div id="side-nav" class="list-group">
+                <a class="list-group-item list-group-item-action" href="#vendor-gallery">Gallery</a>
+                <a class="list-group-item list-group-item-action" href="#vendor-description">Description</a>
+                <a class="list-group-item list-group-item-action" href="#vendor-reviews">Reviews</a>
+            </div>
+        </aside>
+
+        <div class="main-content border rounded">
+            <section class="section-gallery" id="sectionGallery" hidden>
+                <div id="carouselVendorPictures" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        {% for img_file in vendor_images %}
+                        <button type="button" data-bs-target="#carouselVendorPictures"></button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="carousel-inner">
+                        {% for img_file in vendor_images %}
+                        <div class="carousel-item">
+                            <div class="d-flex align-items-end overflow-hidden" style="height: 400px;">
+                                <img src="{{ img_file.image.url }}" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-caption d-none d-md-block">
+                                <h5>{{ img_file.caption }}</h5>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselVendorPictures"
+                        data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselVendorPictures"
+                        data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="section-description p-4">
+                <h4>About this business</h4>
+                <p>{{ seller.description }}</p>
+            </section>
+
+            <section class="section-services p-4">
+                <h4>Services offered</h4>
+                <p>{{ seller.services_offered }}</p>
+            </section>
+
+            <hr class="my-3">
+
+            <section class="section-reviews p-4">
+                <div class="d-flex align-items-end justify-content-between">
+                    <div class="d-flex align-items-end gap-md mb-4">
+                        <h4 class="flex-shrink-0 m-0">{{ vendor_reviews|length }} Reviews</h4>
+                        <!-- <div class="text-muted">SORT BY:</div> -->
+                        <select name="sort" id="sort" class="form-select">
+                            <option value="">Newest</option>
+                            <option value="">Oldest</option>
+                            <option value="">High rating</option>
+                            <option value="">Low rating</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary px-3 py-2" data-bs-toggle="modal" data-bs-target="#rateVendor">Rate
+                        {{ vendor.business_name }}</button>
+                </div>
+
+                {% if vendor_reviews %}
+                {% for review in vendor_reviews %}
+                <div class="review d-flex align-items-start mb-3">
+                    <div
+                        class="circle-50 d-flex align-items-center justify-content-center rounded-circle border bg-light fs-4 me-2">
+                        {{ review.wedplanner.user.last_name|make_list|first }}</div>
+                    <div class="msg">
+                        <strong class="me-1">{{ review.wedplanner.user.first_name }} {{ review.wedplanner.user.last_name
+                            }}</strong>
+                        <small class="text-muted">[Married on {{ review.wedplanner.wedding_date }}]</small>
+                        <div class="rating" data-rating="{{ review.stars }}"></div>
+                        <p>{{ review.comment }}</p>
+                    </div>
+
+                    {% if review.wedplanner.user_id == user.id %}
+                    <div class="mt-1">
+                        <a href="{% url 'edit-vendor-review' review.id %}" class="btn btn-outline-primary btn-sm ms-4">
+                            <i class="fas fa-pencil-alt"></i>
+                            <span class="ms-1">Edit</span>
+                        </a>
+                        <a href="{% url 'delete-vendor-review' review.id %}"
+                            class="btn btn-outline-secondary btn-sm ms-1">
+                            <i class="fas fa-trash-alt"></i>
+                            <span class="ms-1">Delete</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <h6>No reviews for {{ seller.business_name }} yet.</h6>
+                </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+    </div>
+</main>
+
+
+<!-- Modals -->
+<div class="modal fade" id="rateVendor" tabindex="-1" role="dialog" aria-labelledby="rateVendorTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <form action="#" method="POST" name="rateVendorForm" class="modal-content">
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="rateVendorTitle">Rate {{ seller.business_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-body">
+                    {% for field in review_form.visible_fields %}
+                    <div class="form-group">
+                        {{ field.label_tag }}
+                        {% render_field field class+="form-control"%}
+                        {% if field.help_text %}
+                        <span class="help-text">{{ field.help_text }}</span>
+                        {% endif %}
+                        {% for error in field.erros %}
+                        <span style="color:red">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Post Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

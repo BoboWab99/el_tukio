@@ -1,0 +1,35 @@
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb" class="bg-light px-3 py-2">
+    <ol class="breadcrumb m-0 fs-5">
+        <li class="breadcrumb-item"><a href="{% url 'organizer-events' %}">Events</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ event.event_name }}</li>
+    </ol>
+</nav>
+
+<nav class="nav-secondary d-flex justify-content-evenly border-bottom bg-light mb-3">
+    <a href="{% url 'organizer-event-details' event.id %}"
+        class="nav-link {% if active == 'details' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-anchor"></i>
+        <span class="ms-1">Details</span>
+    </a>
+    <a href="{% url 'organizer-event-team' event.id %}"
+        class="nav-link {% if active == 'team' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-users"></i>
+        <span class="ms-1">Event team</span>
+    </a>
+    <a href="#" class="nav-link">
+        <i class="fs-5 fa-solid fa-comments"></i>
+        <span class="ms-1">Chat</span>
+    </a>
+    <a href="{% url 'organizer-event-tasks' event.id %}" class="nav-link {% if active == 'plan' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-diagram-project"></i>
+        <span class="ms-1">Planning</span>
+    </a>
+    <a href="#" class="nav-link {% if active == 'expenses' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-sack-dollar"></i>
+        <span class="ms-1">Expenses</span>
+    </a>
+    <a href="#" class="nav-link {% if active == 'guests' %}text-success{% endif %}">
+        <i class="fs-5 fa-solid fa-user-plus"></i>
+        <span class="ms-1">Guests</span>
+    </a>
+</nav>

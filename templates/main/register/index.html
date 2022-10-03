@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} ElTukio | Create account {% endblock title %}
+
+{% block body %}
+<h4 class="mb-5">Who are You?</h4>
+<a href="{% url 'register-organizer' %}" class="btn btn-primary w-50 py-4 mb-3">I'm planning an event</a>
+<a href="{% url 'register-planner' %}" class="btn btn-success w-50 py-4 mb-3">I'm a proffessional event planner</a>
+<a href="{% url 'register-vendor' %}" class="btn btn-secondary w-50 py-4 mb-3">I sell stuff for events</a>
+{% endblock body %}

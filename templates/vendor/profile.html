@@ -1,0 +1,119 @@
+{% extends 'layouts/dashboard.html' %}
+
+{% block content %}
+<h2>Business profile</h2>
+<div class="shadow px-2 pt-4 pb-5 text-center">
+    <!-- <h2 class="mt-3">Welcome, {{ user.username }}! </h2> -->
+
+    <ul class="list-group py-3 text-start">
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Business name:</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.business_name }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Business category:</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.category.name }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Description:</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.description }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Services You offer:</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.services_offered }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">City:</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.city }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Location (Street) :</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.location }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Open (work) hours:</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span>{{ user.vendor.open_hours }}</span>
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+        <li class="border-bottom p-3 row row-cols-2 align-items-start">
+            <div class="col-3">
+                <span class="text-muted">Ready to take business at the moment?</span>
+            </div>
+            <div class="col-9">
+                <div class="d-flex justify-content-between align-items-start">
+                    {% if user.vendor.up_for_business %}
+                    <span>Yes</span>
+                    {% else %}
+                    <span>No</span>
+                    {% endif %}
+                    <a role="button" class="btn btn-outline-primary border-0" href="{% url 'vendor-profile-update' %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+{% endblock content %}
