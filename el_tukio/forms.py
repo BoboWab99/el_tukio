@@ -4,11 +4,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 
 import datetime as DT
-from el_tukio.models import User, Organizer, Planner, Vendor, VendorCategory, VendorImageUpload, Event, Contract, Task, TaskGroup
+from el_tukio.models import User, Organizer, Planner, Vendor, VendorCategory, VendorImageUpload, Event, Contract, Task, TaskGroup, Expense, ExpenseCategory
 
 
 def vendor_categories():
-    return VendorCategory.objects.all().values_list('pk', 'name')
+    return VendorCategory.objects.all().values_list('id', 'name')
 
 
 class VendorRegForm(UserCreationForm):
@@ -263,7 +263,43 @@ class TaskGroupForm(ModelForm):
         fields = ['name']
 
 
-# class TaskUpdateForm(ModelForm):
-#     class Meta:
-#         model = Task
-#         fields = __all__
+class ExpenseCategoryForm(ModelForm):
+    class Meta:
+        model = ExpenseCategory
+        fields = ['name']
+
+
+class ExpenseForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        # pop out extra/custom args
+        if 'exp_categories' in kwargs:
+            exp_categories = kwargs.pop('exp_categories')
+
+        # initialize form
+        super(ExpenseForm, self).__init__(*args, **kwargs)
+
+        # check if local var exists
+        if 'exp_categories' in locals():
+            self.fields['expense_category'] = forms.ChoiceField(
+                required=False,
+                choices=exp_categories
+            )
+
+    class Meta:
+        model = Expense
+        fields = ['description', 'expense_category', 'total_cost']
+
+
+class ExpenseUpdateForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        if 'exp_categories' in kwargs:
+            exp_categories = kwargs.pop('exp_categories')
+        super(ExpenseUpdateForm, self).__init__(*args, **kwargs)
+        if 'exp_categories' in locals():
+            self.fields['expense_category'] = forms.ChoiceField(
+                required=False,
+                choices=exp_categories
+            )
+    class Meta:
+        model = Expense
+        fields = ['description', 'expense_category', 'total_cost', 'total_paid']

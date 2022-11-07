@@ -49,14 +49,17 @@ urlpatterns += [
         path('events/<int:event_id>/details/', organizer.event_details, name='organizer-event-details'),
         path('events/<int:event_id>/update/', organizer.event_update, name='organizer-event-update'),
         path('events/<int:event_id>/team/', organizer.event_team, name='organizer-event-team'),
+
         path('events/<int:event_id>/tasks/', organizer.tasks, name='organizer-event-tasks'),
         path('events/<int:event_id>/tasks?group=<int:group_id>/', organizer.tasks, name='organizer-event-tasks'),
         path('tasks/<int:task_id>/details/', organizer.task_details, name='task-details'),
         path('tasks/<int:task_id>/complete/', organizer.complete_task, name='complete-task'),
-        # path('tasks/<task_id>/update/', organizer.update_task, name='update-task'),
         path('tasks/<int:task_id>/delete/', organizer.delete_task, name='delete-task'),
         path('tasks/<int:task_id>/assign/<int:member_id>/', organizer.assign_to, name='assign-to'),
         path('tasks/<int:task_id>/assign/remove/', organizer.assign_to_remove, name='assign-to-remove'),
+
+        path('events/<int:event_id>/expenses/', organizer.budget_tracker, name='organizer-event-expenses'),
+        path('expenses/<int:exp_id>/details/', organizer.expense_details, name='organizer-exp-details'),
     ]))
 ]
 

@@ -88,13 +88,13 @@ newTaskForm.addEventListener('submit', (e) => {
         const taskId = form.dataset.taskId;
         let formData = new FormData(form);
         formData.append('task_id', taskId);
-        let task = loadFormData(formData);
+        let data = loadFormData(formData);
         const url = window.location.pathname;
         const callback = async (msg) => {
             notifyAutoHide(msg.content, msg.tag);
             updateTaskUI(taskId);
         }
-        _fetch(url, callback, 'POST', task);
+        _fetch(url, callback, 'POST', data);
     });
 });
 

@@ -8,12 +8,13 @@ from django.db.models import F
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
 import json
 import datetime as DT
 
-from el_tukio.forms import OrganizerRegForm, EventForm, TaskForm, TaskGroupForm, TaskContentUpdateForm, TaskDueDateUpdateForm
-from el_tukio.models import Organizer, Event, Contract, User, Task, TaskGroup
+from el_tukio.forms import OrganizerRegForm, EventForm, TaskForm, TaskGroupForm, TaskContentUpdateForm, TaskDueDateUpdateForm, ExpenseForm, ExpenseUpdateForm, ExpenseCategoryForm
+from el_tukio.models import Organizer, Event, Contract, User, Task, TaskGroup, Expense, ExpenseCategory
 from el_tukio.utils.decorators import organizer_required
 from el_tukio.utils.main import print_form_values
 from el_tukio.utils.messages import msg
@@ -132,7 +133,7 @@ def tasks(request, event_id, group_id=None):
     task_ct_update_form = TaskContentUpdateForm(prefix=TASK_UPDATE_FORM_PREFIX)
     task_dd_update_form = TaskDueDateUpdateForm(event_date=event.event_date, prefix=TASK_UPDATE_FORM_PREFIX)
     task_group_form = TaskGroupForm(prefix=TASK_GROUP_FORM_PREFIX)
-    tasks = Task.objects.filter(event_id=event_id)
+    tasks = Task.objects.filter(event_id=event_id).order_by('completed')
     task_groups = TaskGroup.objects.filter(event_id=event_id)
     all_count = Task.objects.filter(event_id=event_id).count()
     active_group = 'all'
@@ -143,7 +144,7 @@ def tasks(request, event_id, group_id=None):
 
     if group_id:
         task_group = TaskGroup.objects.get(id=group_id)
-        tasks = Task.objects.filter(event_id=event_id, task_group_id=task_group.id)
+        tasks = Task.objects.filter(event_id=event_id, task_group_id=task_group.id).order_by('completed')
         active_group = group_id
         page_title = task_group.name
 
@@ -205,8 +206,8 @@ def tasks(request, event_id, group_id=None):
 
     # js fetch api
     else:
-        data = json.loads(request.body)
-        form_type = data['form_type']
+        form_data = json.loads(request.body)
+        form_type = form_data['form_type']
         form = None
 
         # if form_type == TASK_FORM_PREFIX:
@@ -249,16 +250,16 @@ def tasks(request, event_id, group_id=None):
         #     return JsonResponse(msg.success('Task group created!'))
 
         if form_type == TASK_UPDATE_FORM_PREFIX:
-            task_id = int(data['task_id'])
+            task_id = int(form_data['task_id'])
             task = Task.objects.get(id=task_id)
 
-            if f'{TASK_UPDATE_FORM_PREFIX}-task' in data:
-                form = TaskContentUpdateForm(data, prefix=TASK_UPDATE_FORM_PREFIX)
+            if f'{TASK_UPDATE_FORM_PREFIX}-task' in form_data:
+                form = TaskContentUpdateForm(form_data, prefix=TASK_UPDATE_FORM_PREFIX)
                 if form.is_valid():
                     task.task = form.cleaned_data['task']
                     
-            elif f'{TASK_UPDATE_FORM_PREFIX}-due_date' in data:
-                form = TaskDueDateUpdateForm(data, event_date=event.event_date, prefix=TASK_UPDATE_FORM_PREFIX)
+            elif f'{TASK_UPDATE_FORM_PREFIX}-due_date' in form_data:
+                form = TaskDueDateUpdateForm(form_data, event_date=event.event_date, prefix=TASK_UPDATE_FORM_PREFIX)
                 if form.is_valid():
                     task.due_date = form.cleaned_data['due_date']
 
@@ -334,3 +335,78 @@ def assign_to_remove(request, task_id):
     task.assigned_to = None
     task.save()
     return JsonResponse(msg.success('Task updated!'))
+
+
+@organizer_required
+def budget_tracker(request, event_id):
+    EXPENSE_FORM_PREFIX = 'exp_form'
+    EXPENSE_U_FORM_PREFIX = 'exp_u_form'
+    EXPENSE_CAT_FORM_PREFIX = 'exp_cat_form'
+
+    exp_categories = ExpenseCategory.objects.filter(Q(event__isnull=True) | Q(event_id=event_id)).values_list('id', 'name').order_by('-event')
+
+    event = Event.objects.get(id=event_id)
+    expenses = Expense.objects.filter(event_id=event_id)
+    expense_form = ExpenseForm(prefix=EXPENSE_FORM_PREFIX, exp_categories=exp_categories)
+    expense_u_form = ExpenseUpdateForm(prefix=EXPENSE_U_FORM_PREFIX, exp_categories=exp_categories)
+    expense_cat_form = ExpenseCategoryForm(prefix=EXPENSE_CAT_FORM_PREFIX)
+
+    if not request.method == 'POST':
+        context = {
+            'event': event,
+            'expenses': expenses,
+            'expense_form': expense_form,
+            'expense_u_form': expense_u_form,
+            'expense_cat_form': expense_cat_form,
+            'active': 'expenses'
+        }
+        return render(request, 'organizer/expenses.html', context)
+
+    form_data = request.POST    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form_data = json.loads(request.body)
+        
+    form_type = form_data['form_type']
+
+    if form_type == EXPENSE_FORM_PREFIX:
+        form = ExpenseForm(form_data, prefix=EXPENSE_FORM_PREFIX)
+        if not form.is_valid():
+            messages.add_message(request, messages.WARNING, 'Form NOT valid!')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        
+        expense = Expense.objects.create(
+            event_id=event.id,
+            description=form.cleaned_data['description'],
+            expense_category=form.cleaned_data['expense_category'],
+            total_cost=form.cleaned_data['total_cost'],
+            budgeted_by = request.user
+        )
+        expense.save()
+        messages.success(request, 'Expense recorded!')
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    if form_type == EXPENSE_U_FORM_PREFIX:
+        exp_id = form_data['expense_id']
+        exp = Expense.objects.get(id=exp_id)
+        form = ExpenseUpdateForm(form_data, instance=exp, prefix=EXPENSE_U_FORM_PREFIX)
+        if  not form.is_valid():
+            messages.warning(request, 'Form NOT valid!')
+            return JsonResponse(msg.error('Form NOT valid!'))
+
+        form.save()
+        return JsonResponse(msg.success('Updated!'))
+
+
+@organizer_required
+def expense_details(request, exp_id):
+    exp = Expense.objects.filter(id=exp_id).values(
+        'id',
+        'description',
+        'total_cost',
+        'total_paid',
+        'date_budgeted'
+    ).annotate(
+        budgeted_by_fname=F('budgeted_by__first_name'),
+        budgeted_by_lname=F('budgeted_by__last_name')
+    )[0]
+    return JsonResponse(exp, safe=False)

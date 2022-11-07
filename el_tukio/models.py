@@ -96,13 +96,7 @@ class Vendor(models.Model):
     """Model representing a system user who's a vendor"""
     user = models.OneToOneField(User, on_delete=CASCADE, primary_key=True)
     business_name = models.CharField(max_length=100)
-    category = models.ForeignKey(
-        VendorCategory,
-        on_delete=SET_NULL,
-        null=True,
-        blank=True,
-        help_text='Select a category for your business.',
-    )
+    category = models.ForeignKey(VendorCategory, on_delete=SET_NULL, null=True, blank=True, help_text='Select a category for your business.')
     description = models.TextField(max_length=5000, help_text='Brief description of your business')
     services_offered = models.TextField(max_length=5000, help_text='List the particular services your business offers')
     city = models.CharField(max_length=100, help_text='City in which your business is located')
@@ -211,6 +205,39 @@ class Task(models.Model):
     completed = models.BooleanField(default=False, help_text='Mark this task as completed')
     date_completed = models.DateField(blank=True, null=True)
     completed_by = models.ForeignKey(User, on_delete=SET_NULL, blank=True, null=True, related_name='completed_by')
+    # deleted = models.BooleanField(default=False)
+    # date_deleted = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.event}: {self.task}'
+
+
+class ExpenseCategory(models.Model):
+    """Model representing an expense category.
+    Some general expense categories are pre-defined by the admin in the System.
+    Users can add more categories of their own"""
+    event = models.ForeignKey(Event, on_delete=CASCADE, blank=True, null=True)
+    name = models.CharField(max_length=200, help_text='Categorize your expenses for proper budgeting.')
+
+    def __str__(self):
+        return self.name
+
+
+class Expense(models.Model):
+    """Model representing an budget item or expense"""
+    event = models.ForeignKey(Event, on_delete=CASCADE)
+    expense_category = models.ForeignKey(ExpenseCategory, on_delete=SET_NULL, blank=True, null=True)
+    description = models.TextField(max_length=5000)
+    total_cost = models.FloatField(help_text='Estimated taotal cost of this budget item')
+    total_paid = models.FloatField( blank=True,  null=True, help_text='Total amount already paid for this budget item')
+    budgeted_by = models.ForeignKey(User, on_delete=SET_NULL, blank=True, null=True)
+    date_budgeted = models.DateTimeField(auto_now_add=True)
+    # deleted = models.BooleanField(default=False)
+    # date_deleted = models.DateTimeField(blank=True, null=True)
+
+    @property
+    def balance_cleared(self):
+        return self.total_paid and self.total_cost == self.total_paid
+
+    def __str__(self):
+        return self.description

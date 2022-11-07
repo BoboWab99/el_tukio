@@ -55,6 +55,10 @@ form {
     gap: 3rem !important;
 }
 
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
 .hint,
 .help-text {
     display: inline-block;

@@ -24,7 +24,7 @@
         <i class="fs-5 fa-solid fa-diagram-project"></i>
         <span class="ms-1">Planning</span>
     </a>
-    <a href="#" class="nav-link {% if active == 'expenses' %}text-success{% endif %}">
+    <a href="{% url 'organizer-event-expenses' event.id %}" class="nav-link {% if active == 'expenses' %}text-success{% endif %}">
         <i class="fs-5 fa-solid fa-sack-dollar"></i>
         <span class="ms-1">Expenses</span>
     </a>

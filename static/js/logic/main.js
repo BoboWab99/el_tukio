@@ -172,6 +172,7 @@ function loadFormData(formData) {
     return JSON.stringify(data);
 }
 
+
 // open/close bs popup (modal/offcanvas)
 function showBSPopup(id) {
     const toggleSelector = `[data-bs-target="#${id}"]`;
