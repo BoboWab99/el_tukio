@@ -2,20 +2,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-from django.http import JsonResponse
-from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
+from django.db import transaction
+from django.db.models import Q, F
 
 import datetime as DT
+import calendar as CAL
 
 from setup.settings import LOGIN_URL, HOME_URL
-from el_tukio.models import User, Planner, Vendor, Contract, Event
-from el_tukio.forms import UsernameUpdateForm, FullNameUpdateForm, EmailUpdateForm, PasswordUpdateForm, ContractForm
-from el_tukio.utils.decorators import planner_or_organizer_required, planner_or_vendor_required
-from el_tukio.utils.main import print_form_values
+from el_tukio.models import *
+from el_tukio.forms import *
+from el_tukio.utils.decorators import *
+from el_tukio.utils.main import *
 
 
 def index(request):
@@ -251,5 +252,106 @@ def sign_contract(request, deal_id, action):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-def get_csrf(request):
-    return JsonResponse({'csrf_token': get_token(request)}, status=200)
+@login_required
+@transaction.atomic
+def event_chatroom(request, event_id, chat_with=None):
+    if not request.method == 'POST':
+        event = Event.objects.get(id=event_id)
+        chat_with_user = None
+
+        if chat_with:
+            chat_with_user = User.objects.get(id=chat_with)
+
+        if chat_with_user:
+            chatroom_personal = ChatRoom.objects.filter(
+                type=ChatRoom.Type.PERSONAL, 
+                members__id=request.user.id
+            ).filter(
+                members__id=chat_with
+            )
+            if chatroom_personal:
+                chatroom_personal = chatroom_personal[0]
+            else:
+                # create new personal chatroom
+                chatroom = ChatRoom.objects.create(
+                    name=f'{request.user} & {chat_with_user} chatroom',
+                    type=ChatRoom.Type.PERSONAL
+                )
+                print('Personal chatroom created!')
+                chatroom.members.add(request.user)
+                chatroom.members.add(chat_with_user)
+                chatroom_personal = chatroom
+
+        # Make sure a chatroom is created for every new event
+        if not event.chatroom:
+            chatroom = ChatRoom.objects.create(
+                name=f'{event.event_name} chatroom',
+                type=ChatRoom.Type.GROUP
+            )
+            print('Event chatroom created!')
+            chatroom.members.add(event.organizer.user)
+            event_team = event.event_team.all()
+            for member in event_team:
+                chatroom.members.add(member)            
+            event.chatroom = chatroom
+            event.save()
+
+        event_chatroom = ChatRoom.objects.get(id=event.chatroom_id)
+        event_chatroom.members.add(event.organizer.user)
+        message_form = ChatMessageForm()
+
+        context = {
+            'event': event,
+            'event_chatroom': event_chatroom,
+            'active_chatroom': event_chatroom,
+            'message_form': message_form,
+            'active': 'chat',
+            'active_chat': 0,    #chat with everyone
+            'active_chatroom_id': event_chatroom.id
+        }
+
+        if chat_with_user:
+            context['active_chat'] = chat_with
+            context['active_chatroom'] = chatroom_personal
+        return render(request, 'main/chat.html', context)
+
+    # form submission
+    message_form = ChatMessageForm(request.POST)
+    if not message_form.is_valid():
+        messages.warning(request, 'Form NOT valid!')
+        return redirect(request.META.get('HTTP_REFERER'))
+
+    _new = ChatMessage.objects.create(
+        chatroom_id=request.POST['chatroom'],
+        message=message_form.cleaned_data['message'],
+        sender_id=request.user.id,
+        date_sent=DT.datetime.now()
+    )
+    _new.save()
+
+    # post data contains reference chat id?
+    if reference_id := request.POST['reference']:
+        ref_msg = ChatMessage.objects.get(id=reference_id)
+        _new.reply_to = ref_msg.id
+        _new.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def calendar(request):
+    now = DT.datetime.now()
+    today  = DT.datetime.date
+    curr_month_num_days = CAL.month(now.year, now.month)[1]
+    print(CAL.month(now.year, now.month))
+    # print(CAL.monthrange(now.year, now.month))
+    # print(CAL.firstweekday())
+    context = {
+        'month': now.strftime('%B'),
+        'year': now.year,
+        'today': today,
+    }
+    return render(request, 'main/calendar.html', context)
+
+
+# def get_csrf(request):
+#     return JsonResponse({'csrf_token': get_token(request)}, status=200)

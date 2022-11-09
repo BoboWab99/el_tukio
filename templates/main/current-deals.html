@@ -23,17 +23,17 @@
 <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center">
     {% for deal in mydeals %}
     <div class="col">
-        <a href="#" class="card shadow">
+        <a href="{% url 'organizer-event-details' deal.event.id %}" class="card shadow">
             <div class="card-body p-5">
                 <span class="d-block h4 mb-1">{{ deal.event.event_name }}</span>
                 <span class="d-block text-muted">{{ deal.event.event_date }}</span>
                 <span class="d-block text-muted">Organizer: {{ deal.event.organizer }}</span>
-                <span class="d-block text-muted">Status: {{ deal.get_status_display }}</span>
+                {% comment %} <span class="d-block text-muted">Status: {{ deal.get_status_display }}</span>
                 <span class="d-block text-muted">Terms: {{ deal.terms }}</span>
                 <span class="d-block text-muted">Sent: {{ deal.date_sent }}</span>
                 <span class="d-block text-muted">By: {{ deal.contractor }}</span>
                 <span class="d-block text-muted">Signed: {{ deal.date_signed }}</span>
-                <span class="d-block text-muted">By: {{ deal.contractee }}</span>
+                <span class="d-block text-muted">By: {{ deal.contractee }}</span> {% endcomment %}
                 {% if deal.get_status_display.lower == 'pending' %}
                 <div class="d-flex justify-content-center gap-sm pt-2">
                     <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"

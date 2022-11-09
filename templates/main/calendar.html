@@ -1,0 +1,97 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<h5 class="mt-4 mb-5">My custom calendar</h5>
+
+<div class="row row-cols-2">
+    <div class="col">
+        <div class="todays text-start">
+            <h3 class="text-uppercase mb-4">Wednesday <br>November 11th</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item px-0">Activity one</li>
+                <li class="list-group-item px-0">Activity two</li>
+                <li class="list-group-item px-0">Activity three</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="calendar rounded-md overflow-hidden border border-info">
+            <div class="calendar-header bg-primary text-white rounded-top">
+                <div class="calendar-header-highlight d-flex align-items-center justify-content-between py-4 px-3">
+                    <div class="prev-month"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="month-info fw-bold text-uppercase">{{ month }} {{ year }}</div>
+                    <div class="next-month"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+
+                <div class="calendar-header-months d-flex align-items-center justify-content-between text-uppercase py-2 px-3" style="background: #1467e1">
+                    <small>Jan</small>
+                    <small>Feb</small>
+                    <small>Mar</small>
+                    <small>Apr</small>
+                    <small>May</small>
+                    <small>Jun</small>
+                    <small>Jul</small>
+                    <small>Aug</small>
+                    <small>Sep</small>
+                    <small>Oct</small>
+                    <small class="active">Nov</small>
+                    <small>Dec</small>
+                </div>
+            </div>
+
+            <div class="calendar-labels d-flex flex-items-equal align-items-center text-muted py-3">
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+                <div>Sun</div>
+            </div>
+
+            <div class="calendar-body">
+                <div class="blank-start"></div>
+                <div class="date">1</div>
+                <div class="date">2</div>
+                <div class="date">3</div>
+                <div class="date">4</div>
+                <div class="date">5</div>
+                <div class="date">6</div>
+                <div class="date">7</div>
+                <div class="date">8</div>
+                <div class="date">9</div>
+                <div class="date">10</div>
+                <div class="date active"><span>11</span></div>
+                <div class="date">12</div>
+                <div class="date">13</div>
+                <div class="date">14</div>
+                <div class="date">15</div>
+                <div class="date">16</div>
+                <div class="date">17</div>
+                <div class="date">18</div>
+                <div class="date">19</div>
+                <div class="date">20</div>
+                <div class="date">21</div>
+                <div class="date">22</div>
+                <div class="date">23</div>
+                <div class="date">24</div>
+                <div class="date">25</div>
+                <div class="date">26</div>
+                <div class="date">27</div>
+                <div class="date">28</div>
+                <div class="date">29</div>
+                <div class="date">30</div>
+                <div class="blank-end"></div>
+            </div>
+            <div class="calendar-footer rounded-bottom px-3 py-2">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

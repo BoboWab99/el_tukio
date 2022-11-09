@@ -80,7 +80,11 @@ async function _fetch(url, callback, method='GET', data) {
     });
 }
 
-
+/**
+ * format date string to 'dd/mm/yyyy' EG: '25/12/2000'
+ * @param {String} dateStr - date string
+ * @returns {String} 
+ */
 function formatDate(dateStr) {
     if (dateStr == null) return '';
 
@@ -162,8 +166,11 @@ function notifySessionMessages() {
 }
 
 
-// load form data
-
+/**
+ * Get JSON string containing submitted form data
+ * @param {FormData} formData  - form data instance from html form
+ * @returns {String} JSON string
+ */
 function loadFormData(formData) {
     let data = {};
     for (const pair of formData.entries()) {
@@ -173,12 +180,19 @@ function loadFormData(formData) {
 }
 
 
-// open/close bs popup (modal/offcanvas)
+/**
+ * Show bootstrap popup (EG: modal, offcanvas) element
+ * @param {String} id - popup element ID
+ */
 function showBSPopup(id) {
     const toggleSelector = `[data-bs-target="#${id}"]`;
     document.querySelector(toggleSelector).click();
 }
 
+/**
+ * Hide bootstrap popup (EG: modal, offcanvas) element
+ * @param {String} id - popup element ID
+ */
 function hideBSPopup(id) {
     const popup = document.getElementById(id);
     popup.querySelector('[data-bs-dismiss]').click();

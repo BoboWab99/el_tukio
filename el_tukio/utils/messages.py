@@ -25,6 +25,6 @@ class msg():
     @staticmethod
     def error(msg):
         return {
-            'tag': 'DANGER',
+            'tag': 'ERROR',
             'content': msg
         }

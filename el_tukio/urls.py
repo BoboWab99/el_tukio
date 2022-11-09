@@ -20,7 +20,10 @@ urlpatterns = [
     path('my/deals/', main.current_deals, name='current-deals'),
     path('my/deals/<str:status>/', main.current_deals, name='current-deals'),
     path('my/deals/sign/<int:deal_id>/<str:action>/', main.sign_contract, name='sign-deal'),
-    path('csrf-token/', main.get_csrf)
+    path('events/<int:event_id>/chatroom/', main.event_chatroom, name='event-chatroom'),
+    path('events/<int:event_id>/chatroom/chat-with/<int:chat_with>/', main.event_chatroom, name='event-chatroom'),
+    path('my/calendar/', main.calendar, name='calendar'),
+    # path('csrf-token/', main.get_csrf)
 ]
 
 urlpatterns += [
@@ -60,6 +63,7 @@ urlpatterns += [
 
         path('events/<int:event_id>/expenses/', organizer.budget_tracker, name='organizer-event-expenses'),
         path('expenses/<int:exp_id>/details/', organizer.expense_details, name='organizer-exp-details'),
+        path('expenses/<int:id>/delete/', organizer.delete_expense, name='delete-expense'),
     ]))
 ]
 

@@ -19,12 +19,14 @@
             <div class="col-9"><span>{{ event.event_date }}</span></div>
         </div>
     </li>
+    {% if user.is_planner or user.is_organizer %}
     <li class="list-group-item text-start">
         <div class="row row-cols-2">
             <div class="col-3"><span class="text-muted">Event budget:</span></div>
             <div class="col-9"><span>{{ event.event_budget }}</span></div>
         </div>
     </li>
+    {% endif %}
     <li class="list-group-item text-start">
         <div class="row row-cols-2">
             <div class="col-3"><span class="text-muted">Event location:</span></div>
@@ -39,10 +41,12 @@
     </li>
 </ul>
 
+{% if user.is_planner or user.is_organizer %}
 <div class="text-end">
     <a href="{% url 'organizer-event-update' event_id=event.id %}" class="btn btn-primary">
         <span class="ms-e">Update details</span>
         <i class="fa-solid fa-chevron-right"></i>
     </a>
 </div>
+{% endif %}
 {% endblock content %}

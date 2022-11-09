@@ -1,0 +1,78 @@
+{% extends 'layouts/dashboard.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+{% include 'components/nav-event.html' %}
+<h1 class="text-center">{{ event_chatroom.name }}</h1>
+<div class="d-flex gap-sm align-items-center justify-content-center mb-4">
+    <strong class="text-muted">Chatting with:</strong>
+    <a role="button" class="btn btn-{% if active_chat == 0 %}success{% else %}light{% endif %}" href="{% url 'event-chatroom' event.id %}" title="Chat with Everyone">
+        Everyone
+    </a>
+    <a role="button" class="btn btn-light disabled" style="opacity: 1">
+        {{ user }}
+        <strong>[ME]</strong>
+    </a>
+    {% for member in event_chatroom.members.all %}
+        {% if member.id != user.id %}
+        <a role="button" href="{% url 'event-chatroom' event_id=event.id chat_with=member.id %}" class="btn btn-{% if active_chat == member.id %}success{% else %}light{% endif %}" title="Chat with {{ member }}">
+            {{ member }}
+        </a>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="chat-form-wrapper text-start position-relative" id="chatFormWrapper">
+    <form name="chatMessageForm" action="{{ request.path_info }}" method="POST" class="d-flex gap-sm">
+        {% csrf_token %}
+        <input type="hidden" name="chatroom" value="{{ active_chatroom.id }}">
+        <input type="hidden" name="reference">
+        {% render_field message_form.message class+='form-control' placeholder='Enter message...' %}
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
+
+<div class="card messages-wrapper text-start my-4">
+    <div class="messages-inner d-flex flex-column gap-sm p-4">
+        {% for msg in active_chatroom.chatmessage_set.all %}
+        <div class="chat-message {% if msg.sender.id == user.id %}outgoing{% else %}incoming{% endif %} position-relative">
+            <div class="options position-absolute top-0 bottom-0 d-flex align-items-center gap-sm px-2">
+                <a role="button" class="d-inline-flex align-items-center justify-content-center rounded-circle" onclick="replyTo({{ msg.id }}, this)" title="Reply">
+                    <i class="fa-solid fa-reply"></i>
+                </a>
+            </div>
+            {% comment %} Original message if current is a reply {% endcomment %}
+            {% if msg.reference %}
+            <div class="chat-message-inner">
+                <p class="mb-0">
+                    {% if msg.reference.sender.id != user.id %}
+                    <span class="text-primary">{{ msg.reference.sender }}</span>
+                    {% endif %}
+                    <small class="text-muted">{{ msg.reference.date_sent }}</small>
+                </p>
+                <p class="mb-0">{{ msg.reference.message }}</p>
+            </div>
+            {% endif %}
+            {% comment %} Current message {% endcomment %}
+            <div class="chat-message-content">
+                <p class="mb-0">
+                    {% comment %} {% if msg.sender.id != user.id and active_chatroom.get_type_display == 'Group' %} {% endcomment %}
+                    {% if msg.sender.id != user.id %}
+                    <span class="text-primary">{{ msg.sender }}</span>
+                    {% endif %}
+                    <small class="text-muted">{{ msg.date_sent }}</small>
+                </p>
+                <p class="mb-0">{{ msg.message }}</p>
+            </div>
+        </div>
+        {% empty %}
+        No messages yet!
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'js/dom/chat.js' %}" defer></script>
+{% endblock scripts %}

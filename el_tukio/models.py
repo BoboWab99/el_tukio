@@ -2,8 +2,11 @@ from django.db import models
 from django.db.models.deletion import CASCADE, SET_NULL
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
+from django.db.models import CheckConstraint, Q, F
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+from django.db.models.signals import m2m_changed
 
 from phonenumber_field.modelfields import PhoneNumberField
 from PIL import Image
@@ -60,10 +63,79 @@ class User(AbstractUser):
             img.save(self.profile.path)
 
 
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    comment = models.CharField(max_length=500)
+    date_posted = models.DateTimeField(auto_now_add=True)
+
+
+class FileUpload(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    file = models.FileField(upload_to='uploads/')
+    date_uploaded = models.DateTimeField(auto_now_add=True)
+
+
+class ChatRoom(models.Model):
+    class Type(models.IntegerChoices):
+        PERSONAL = 0, _('Personal')
+        GROUP = 1, _('Group')
+
+    name = models.CharField(max_length=50, blank=True, null=True)
+    type = models.SmallIntegerField(choices=Type.choices)
+    members = models.ManyToManyField(User, blank=True, related_name='chatroom')
+
+    # def clean(self, *args, **kwargs):
+    #     if self.members.count() == 2:
+    #         raise ValidationError(_("Personal chat can't have more than 2 people!"))
+    #     super(ChatRoom, self).clean(*args, **kwargs)
+
+    # def save(self, *args, **kwargs):
+    #     if self.type == self.Type.PERSONAL and self.members.count() == 2:
+    #         raise ValidationError(_("Personal chat can't have more than 2 people!"))
+    #     else:
+    #         super().save(*args, **kwargs)
+
+
+# limit members in personal chat
+def chat_members_changed(sender, **kwargs):
+    chatroom = kwargs['instance']
+    if chatroom.type == ChatRoom.Type.PERSONAL and chatroom.members.count() > 2:
+        raise ValidationError(_("Personal chat can't have more than 2 people!"))
+
+m2m_changed.connect(chat_members_changed, sender=ChatRoom.members.through)
+
+
+class ChatMessage(models.Model):
+    chatroom = models.ForeignKey(ChatRoom, on_delete=CASCADE)
+    message = models.CharField(max_length=5000, help_text='Enter message...')
+    sender = models.ForeignKey(User, on_delete=CASCADE)
+    date_sent = models.DateTimeField(auto_now_add=True)
+    reply_to = models.BigIntegerField(blank=True, null=True)
+
+    @property
+    def reference(self):
+        return ChatMessage.objects.get(id=self.reply_to)
+
+    class Meta:
+        ordering = ['date_sent']
+
+
+# class ChatMessageReply(ChatMessage):
+#     reference = models.ForeignKey(ChatMessage, on_delete=CASCADE, related_name='chat_reply_message')
+
+#     class Meta:
+#         verbose_name = 'Chat Message Reply'
+#         verbose_name_plural = 'Chat Message Replies'
+
+
 class VendorCategory(models.Model):
     """Model representing a wedding vendor category. 
     Vendor categories are added by the Admin in the database. """
     name = models.CharField( max_length=200, help_text='Select a category (EG: Venues)')
+
+    class Meta:
+        verbose_name = 'Vendor Category'
+        verbose_name_plural = 'Vendor Categories'
 
     def __str__(self):
         return self.name
@@ -130,8 +202,8 @@ class Event(models.Model):
     event_budget = models.FloatField(help_text='What  is the budget for this event?')
     event_location = models.CharField(max_length=100, null=True, blank=True)
     guest_size = models.IntegerField(help_text='Expected number of guests at the event?')
-    planners = models.ManyToManyField(Planner)
-    vendors = models.ManyToManyField(Vendor)
+    event_team = models.ManyToManyField(User, related_name='event_team_members')
+    chatroom = models.OneToOneField(ChatRoom, on_delete=SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return f'{self.event_name} (organizer: {self.organizer})'
@@ -205,8 +277,10 @@ class Task(models.Model):
     completed = models.BooleanField(default=False, help_text='Mark this task as completed')
     date_completed = models.DateField(blank=True, null=True)
     completed_by = models.ForeignKey(User, on_delete=SET_NULL, blank=True, null=True, related_name='completed_by')
-    # deleted = models.BooleanField(default=False)
-    # date_deleted = models.DateTimeField(blank=True, null=True)
+    comments = models.ManyToManyField(Comment, related_name='task_comments')
+    files = models.ManyToManyField(FileUpload, related_name='task_files')
+    deleted = models.BooleanField(default=False)
+    date_deleted = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.event}: {self.task}'
@@ -219,6 +293,10 @@ class ExpenseCategory(models.Model):
     event = models.ForeignKey(Event, on_delete=CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200, help_text='Categorize your expenses for proper budgeting.')
 
+    class Meta:
+        verbose_name = 'Expense Category'
+        verbose_name_plural = 'Expense Categories'
+
     def __str__(self):
         return self.name
 
@@ -229,15 +307,27 @@ class Expense(models.Model):
     expense_category = models.ForeignKey(ExpenseCategory, on_delete=SET_NULL, blank=True, null=True)
     description = models.TextField(max_length=5000)
     total_cost = models.FloatField(help_text='Estimated taotal cost of this budget item')
-    total_paid = models.FloatField( blank=True,  null=True, help_text='Total amount already paid for this budget item')
+    total_paid = models.FloatField( default=0, help_text='Total amount already paid for this budget item')
     budgeted_by = models.ForeignKey(User, on_delete=SET_NULL, blank=True, null=True)
     date_budgeted = models.DateTimeField(auto_now_add=True)
-    # deleted = models.BooleanField(default=False)
-    # date_deleted = models.DateTimeField(blank=True, null=True)
+    comments = models.ManyToManyField(Comment, related_name='expense_comments')
+    files = models.ManyToManyField(FileUpload, related_name='expense_files')
+    deleted = models.BooleanField(default=False)
+    date_deleted = models.DateTimeField(blank=True, null=True)
 
     @property
     def balance_cleared(self):
         return self.total_paid and self.total_cost == self.total_paid
+
+    class Meta:
+        constraints = [
+            CheckConstraint(check=Q(total_cost__gte=F('total_paid')), name='check_total_cost_vs_paid')
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.total_paid > self.total_cost:
+            raise ValidationError(_('Invalid. Total paid greater than total cost!'))
 
     def __str__(self):
         return self.description

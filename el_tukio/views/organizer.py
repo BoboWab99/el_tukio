@@ -1,23 +1,23 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView, UpdateView
 from django.contrib.auth import login
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
-from django.db.models import F
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
+from django.db.models import Q, F
 
 import json
 import datetime as DT
 
-from el_tukio.forms import OrganizerRegForm, EventForm, TaskForm, TaskGroupForm, TaskContentUpdateForm, TaskDueDateUpdateForm, ExpenseForm, ExpenseUpdateForm, ExpenseCategoryForm
-from el_tukio.models import Organizer, Event, Contract, User, Task, TaskGroup, Expense, ExpenseCategory
-from el_tukio.utils.decorators import organizer_required
-from el_tukio.utils.main import print_form_values
-from el_tukio.utils.messages import msg
+from el_tukio.forms import *
+from el_tukio.models import *
+from el_tukio.utils.decorators import *
+from el_tukio.utils.main import *
+from el_tukio.utils.messages import *
 
 
 class Register(CreateView):
@@ -82,7 +82,7 @@ class EventUpdate(UpdateView):
         return redirect('organizer-events')
 
 
-@organizer_required
+@login_required
 def event_details(request, event_id):
     event = Event.objects.get(pk=event_id)
     context = {
@@ -114,6 +114,12 @@ def event_team(request, event_id):
     event = Event.objects.get(id=event_id)
     team_ids = Contract.objects.filter(event_id=event_id, status=Contract.Status.ACCEPTED).values_list('contractee_id')
     team = User.objects.filter(id__in=team_ids)
+
+    for member in team:
+        event.event_team.add(member)
+    event.save()
+    print(event.event_team.all())
+
     context = {
         'team': team, 
         'event': event,
@@ -390,8 +396,8 @@ def budget_tracker(request, event_id):
         exp = Expense.objects.get(id=exp_id)
         form = ExpenseUpdateForm(form_data, instance=exp, prefix=EXPENSE_U_FORM_PREFIX)
         if  not form.is_valid():
-            messages.warning(request, 'Form NOT valid!')
-            return JsonResponse(msg.error('Form NOT valid!'))
+            error = form.errors.as_data()['__all__'][0]
+            return JsonResponse(msg.error(f'Ooops! {error}'))
 
         form.save()
         return JsonResponse(msg.success('Updated!'))
@@ -410,3 +416,9 @@ def expense_details(request, exp_id):
         budgeted_by_lname=F('budgeted_by__last_name')
     )[0]
     return JsonResponse(exp, safe=False)
+
+
+@organizer_required
+def delete_expense(request, id):
+    Expense.objects.get(id=id).delete()
+    return JsonResponse(msg.success('Deleted!'))

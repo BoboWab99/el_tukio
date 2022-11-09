@@ -55,8 +55,24 @@ form {
     gap: 3rem !important;
 }
 
+.rounded-sm {
+    border-radius: 0.5rem !important;
+}
+
+.rounded-md {
+    border-radius: 1rem !important;
+}
+
+.rounded-lg {
+    border-radius: 1.5rem !important;
+}
+
 .cursor-pointer {
     cursor: pointer !important;
+}
+
+.flex-items-equal > *{
+    flex: 1 1 0;
 }
 
 .hint,
@@ -77,4 +93,124 @@ form {
 [type=checkbox].rounded-circle {
     width: 1.3em;
     height: 1.3em;
+}
+
+
+/* chat */
+
+.chat-form-wrapper .alert {
+    box-shadow: inset 0 2px 4px rgba(255 255 255 / 0.8), -1px 2px 6px 2px rgba(0 0 0 / 0.3);
+}
+
+.messages-wrapper {
+    background-color: #829ebb;
+}
+
+.chat-message,
+.chat-message-inner {
+    flex: 1 1 80%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0 0 0 / 0.2);
+}
+
+.chat-message-inner {
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px rgb(0 0 0 / 20%);
+}
+
+.chat-message .chat-message-inner {
+    margin-bottom: 0.25rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    opacity: 0.85;
+}
+
+.chat-message.outgoing {
+    align-self: flex-end;
+    border-top-right-radius: 0;
+    background-color: #e5efff;
+}
+
+.chat-message.incoming {
+    align-self: flex-start;
+    border-top-left-radius: 0;
+    background-color: #fff;
+}
+
+.alert .chat-message-inner,
+.chat-message.outgoing .chat-message-inner {
+    background-color: #fff;
+}
+
+.chat-message.incoming .chat-message-inner {
+    background-color: #ededed;
+}
+
+.chat-message .options  {
+    opacity: 0;
+    transition: 0.25s ease-in-out;
+}
+
+.chat-message:hover .options {
+    opacity: 1;
+}
+
+.chat-message.outgoing .options {
+    right: 100%;
+}
+
+.chat-message.incoming .options {
+    left: 100%;
+}
+
+.chat-message .options>* {
+    --radius: 36px;
+    width: var(--radius);
+    height: var(--radius);
+    background-color: rgba(255 255 255 / 0.5);
+    transition: 0.1s ease-in-out;
+}
+
+.chat-message .options>*:hover {
+    background-color: rgba(255 255 255 / 1);
+}
+
+
+/* calendar */
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-body > * {
+    --cell-size: 40px;
+    height: var(--cell-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-body > * > *{
+    width: var(--cell-size, 40px);
+    height: var(--cell-size, 40px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-body > *.active > * {
+    border-radius: 50%;
+    color: #fff;
+    background-color: #0d6efd;
+}
+
+.calendar-header-months > * {
+    font-size: 11px;
+    color: rgba(255 255 255 / 0.6);
+}
+
+.calendar-header-months>*.active {
+    color: #fff;
 }

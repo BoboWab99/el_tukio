@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 
 import datetime as DT
-from el_tukio.models import User, Organizer, Planner, Vendor, VendorCategory, VendorImageUpload, Event, Contract, Task, TaskGroup, Expense, ExpenseCategory
+from el_tukio.models import *
 
 
 def vendor_categories():
@@ -303,3 +303,9 @@ class ExpenseUpdateForm(ModelForm):
     class Meta:
         model = Expense
         fields = ['description', 'expense_category', 'total_cost', 'total_paid']
+
+
+class ChatMessageForm(ModelForm):
+    class Meta:
+        model = ChatMessage
+        fields = ['message']
