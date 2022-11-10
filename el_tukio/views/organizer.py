@@ -131,18 +131,18 @@ def event_team(request, event_id):
 @organizer_required
 def tasks(request, event_id, group_id=None):
     TASK_FORM_PREFIX = 'task_form'
-    TASK_UPDATE_FORM_PREFIX = 'task_u_form'
-    TASK_GROUP_FORM_PREFIX = 'group_form'
+    TASK_U_FORM_PREFIX = 'task_u_form'
+    TASK_GRP_FORM_PREFIX = 'group_form'
 
     event = Event.objects.get(id=event_id)
     task_form = TaskForm(event_date=event.event_date, prefix=TASK_FORM_PREFIX)
-    task_ct_update_form = TaskContentUpdateForm(prefix=TASK_UPDATE_FORM_PREFIX)
-    task_dd_update_form = TaskDueDateUpdateForm(event_date=event.event_date, prefix=TASK_UPDATE_FORM_PREFIX)
-    task_group_form = TaskGroupForm(prefix=TASK_GROUP_FORM_PREFIX)
+    task_ct_update_form = TaskContentUpdateForm(prefix=TASK_U_FORM_PREFIX)
+    task_dd_update_form = TaskDueDateUpdateForm(event_date=event.event_date, prefix=TASK_U_FORM_PREFIX)
+    task_group_form = TaskGroupForm(prefix=TASK_GRP_FORM_PREFIX)
     tasks = Task.objects.filter(event_id=event_id).order_by('completed')
     task_groups = TaskGroup.objects.filter(event_id=event_id)
     all_count = Task.objects.filter(event_id=event_id).count()
-    active_group = 'all'
+    active_group = 0
     page_title = 'Event Tasks'
 
     team_ids = Contract.objects.filter(event_id=event_id, status=Contract.Status.ACCEPTED).values_list('contractee_id')
@@ -151,7 +151,7 @@ def tasks(request, event_id, group_id=None):
     if group_id:
         task_group = TaskGroup.objects.get(id=group_id)
         tasks = Task.objects.filter(event_id=event_id, task_group_id=task_group.id).order_by('completed')
-        active_group = group_id
+        active_group = task_group.id
         page_title = task_group.name
 
     if not request.method == 'POST':      
@@ -173,6 +173,7 @@ def tasks(request, event_id, group_id=None):
 
     # post using fetch api?
     using_fetch_api = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if not using_fetch_api:
         form_type = request.POST['form_type']
 
@@ -191,13 +192,13 @@ def tasks(request, event_id, group_id=None):
 
             if group_id:
                 task.task_group = TaskGroup.objects.get(id=group_id)
-
-            task.save()
+                task.save()
+                
             messages.success(request, 'New task added!')
             return redirect(request.META.get('HTTP_REFERER', '/'))
 
-        elif form_type == TASK_GROUP_FORM_PREFIX:
-            form = TaskGroupForm(request.POST, prefix=TASK_GROUP_FORM_PREFIX)
+        elif form_type == TASK_GRP_FORM_PREFIX:
+            form = TaskGroupForm(request.POST, prefix=TASK_GRP_FORM_PREFIX)
             if not form.is_valid():
                 messages.success(request, 'Form NOT valid!')
                 return redirect(request.META.get('HTTP_REFERER', '/'))
@@ -210,62 +211,23 @@ def tasks(request, event_id, group_id=None):
             messages.success(request, 'Task group created!')
             return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    # js fetch api
+    # using js fetch api
     else:
         form_data = json.loads(request.body)
         form_type = form_data['form_type']
         form = None
 
-        # if form_type == TASK_FORM_PREFIX:
-        #     form = TaskForm(data, event_date=event.event_date, prefix=TASK_FORM_PREFIX)
-        #     if not form.is_valid():
-        #         return JsonResponse(msg.error('Form NOT valid!'))
-
-        #     task = Task.objects.create(
-        #         event_id=event.id,
-        #         task=form.cleaned_data['task'],
-        #         due_date=form.cleaned_data['due_date'],
-        #         created_by_id=request.user.id
-        #     )
-
-        #     if group_id:
-        #         task.task_group = TaskGroup.objects.get(id=group_id)
-
-        #     task.save()
-        #     new_task = Task.objects.filter(id=task.id).values(
-        #         'id',
-        #         'task',
-        #         'due_date',
-        #         'completed'
-        #     ).annotate(
-        #         task_group=F('task_group__name')
-        #     )[0]
-        #     _msg = msg.success('New task added!')
-        #     return JsonResponse({'task': new_task, 'msg': _msg})    
-
-        # elif form_type == TASK_GROUP_FORM_PREFIX:
-        #     form = TaskGroupForm(data, prefix=TASK_GROUP_FORM_PREFIX)
-        #     if not form.is_valid():
-        #         return JsonResponse(msg.error('Form NOT valid!'))
-            
-        #     task_group = TaskGroup.objects.create(
-        #         event_id=event.id,
-        #         name=form.cleaned_data['name']
-        #     )
-        #     task_group.save()
-        #     return JsonResponse(msg.success('Task group created!'))
-
-        if form_type == TASK_UPDATE_FORM_PREFIX:
+        if form_type == TASK_U_FORM_PREFIX:
             task_id = int(form_data['task_id'])
             task = Task.objects.get(id=task_id)
 
-            if f'{TASK_UPDATE_FORM_PREFIX}-task' in form_data:
-                form = TaskContentUpdateForm(form_data, prefix=TASK_UPDATE_FORM_PREFIX)
+            if f'{TASK_U_FORM_PREFIX}-task' in form_data:
+                form = TaskContentUpdateForm(form_data, prefix=TASK_U_FORM_PREFIX)
                 if form.is_valid():
                     task.task = form.cleaned_data['task']
                     
-            elif f'{TASK_UPDATE_FORM_PREFIX}-due_date' in form_data:
-                form = TaskDueDateUpdateForm(form_data, event_date=event.event_date, prefix=TASK_UPDATE_FORM_PREFIX)
+            elif f'{TASK_U_FORM_PREFIX}-due_date' in form_data:
+                form = TaskDueDateUpdateForm(form_data, event_date=event.event_date, prefix=TASK_U_FORM_PREFIX)
                 if form.is_valid():
                     task.due_date = form.cleaned_data['due_date']
 
@@ -274,8 +236,17 @@ def tasks(request, event_id, group_id=None):
 
             task.save()
             return JsonResponse(msg.info('Task updated!'))
-        return JsonResponse(msg.error('Errrooorrrrr!'))
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        # task group name update
+        elif form_type == TASK_GRP_FORM_PREFIX:
+            if task_group_id := form_data['task_group_id']:
+                task_group = TaskGroup.objects.get(id=task_group_id)
+                form = TaskGroupForm(form_data, instance=task_group, prefix=TASK_GRP_FORM_PREFIX)
+                if form.is_valid():
+                    form.save()
+                    return JsonResponse(msg.success('Updated!'))
+                else:
+                    return JsonResponse(msg.error('Error!'))
 
 
 @organizer_required
@@ -294,6 +265,7 @@ def task_details(request, task_id):
         assigned_to_id=F('assigned_to__id'),
         assigned_to_fname=F('assigned_to__first_name'),
         assigned_to_lname=F('assigned_to__last_name'),
+        assigned_to_phone=F('assigned_to__phone_number'),
         completed_by_fname=F('completed_by__first_name'),
         completed_by_lname=F('completed_by__last_name')
     )[0]
@@ -342,6 +314,21 @@ def assign_to_remove(request, task_id):
     task.save()
     return JsonResponse(msg.success('Task updated!'))
 
+
+@organizer_required
+def delete_task_group(request, event_id, group_id, tasks_included='No'):
+    group = TaskGroup.objects.get(id=group_id, event_id=event_id)
+
+    if tasks_included and tasks_included == 'Yes':
+        tasks = Task.objects.filter(task_group_id=group.id)
+        for task in tasks:
+            task.delete()
+
+    group.delete()
+    return redirect('organizer-event-tasks', event_id=event_id)
+
+
+# budget tracker
 
 @organizer_required
 def budget_tracker(request, event_id):

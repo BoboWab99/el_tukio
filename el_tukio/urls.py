@@ -56,7 +56,10 @@ urlpatterns += [
         path('events/<int:event_id>/team/', organizer.event_team, name='organizer-event-team'),
 
         path('events/<int:event_id>/tasks/', organizer.tasks, name='organizer-event-tasks'),
-        path('events/<int:event_id>/tasks?group=<int:group_id>/', organizer.tasks, name='organizer-event-tasks'),
+        path('events/<int:event_id>/tasks/group=<int:group_id>/', organizer.tasks, name='organizer-event-tasks'),
+        path('events/<int:event_id>/tasks/group=<int:group_id>/delete/', organizer.delete_task_group, name='delete-task-group'),
+        path('events/<int:event_id>/tasks/group=<int:group_id>/delete/tasks-included=<str:tasks_included>/',
+             organizer.delete_task_group, name='delete-task-group'),
         path('tasks/<int:task_id>/details/', organizer.task_details, name='task-details'),
         path('tasks/<int:task_id>/complete/', organizer.complete_task, name='complete-task'),
         path('tasks/<int:task_id>/delete/', organizer.delete_task, name='delete-task'),

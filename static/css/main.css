@@ -67,6 +67,15 @@ form {
     border-radius: 1.5rem !important;
 }
 
+.circle-sm {
+    --radius: 30px;
+    height: var(--radius);
+    width: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .cursor-pointer {
     cursor: pointer !important;
 }
@@ -95,6 +104,41 @@ form {
     height: 1.3em;
 }
 
+
+/* tasks */
+
+.task-group-options {
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s ease-in-out;
+    transform: translateX(-1rem);
+    z-index: 9;
+}
+
+.list-group-item.active {
+    z-index: initial;
+}
+
+.list-group-item.active>*,
+.list-group-item.active>*>* {
+    color: #fff;
+}
+
+.dropdown-item {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+}
+
+.list-group-event-tasks .list-group-item:hover .task-group-options {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.task-group-options>* {
+    min-width: 200px;
+    max-width: 300px;
+    width: fit-content;
+}
 
 /* chat */
 

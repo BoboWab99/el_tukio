@@ -21,16 +21,14 @@
                         <i class="fa-regular fa-calendar"></i>
                         {{ task.due_date }}
                     </span>
-                    <button class="btn btn-sm btn-info px-1 py-0">
-                        {% if task.task_group %}
-                        {{ task.task_group }}
-                        {% else %}
-                        Tasks
-                        {% endif %}
-                    </button>
-                    <button class="btn btn-sm btn-secondary px-1 py-0">
+                    {% if task.task_group %}
+                    <a role="button" href="{% url 'organizer-event-tasks' task.event.id task.task_group_id %}" class="btn btn-sm btn-info px-1 py-0">{{ task.task_group }}</a>
+                    {% else %}
+                    <a role="button" href="{% url 'organizer-event-tasks' task.event.id %}" class="btn btn-sm btn-info px-1 py-0">Tasks</a>
+                    {% endif %}
+                    <a role="button" href="{% url 'organizer-event-details' task.event.id %}" class="btn btn-sm btn-secondary px-1 py-0">
                         {{ task.event }}
-                    </button>
+                    </a>
                 </li>
                 {% empty %}
                 <div class="text-success mt-2">No tasks due!</div>
@@ -49,16 +47,14 @@
                         <i class="fa-solid fa-pen"></i>
                         {{ xp.date_budgeted|date }}
                     </span>
-                    <button class="btn btn-sm btn-info px-1 py-0">
+                    <a role="button" href="{% url 'organizer-event-expenses' xp.event_id %}" class="btn btn-sm btn-info px-1 py-0">
                         {% if xp.expense_category %}
                         {{ xp.expense_category }}
                         {% else %}
                         General expenses
                         {% endif %}
-                    </button>
-                    <button class="btn btn-sm btn-secondary px-1 py-0">
-                        {{ xp.event }}
-                    </button>
+                    </a>
+                    <a role="button" href="{% url 'organizer-event-details' xp.event_id %}" class="btn btn-sm btn-secondary px-1 py-0">{{ xp.event }}</a>
                     {% empty %}
                     <div class="text-success mt-2">All events' bills settled!</div>
                     {% endfor %}

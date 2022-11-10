@@ -1,38 +1,4 @@
-// modal value placeholders
-const sectionTasks = document.getElementById('sectionTasks');
-const offcanvas = document.getElementById('offcanvasTask');
-const newTaskForm = document.forms.newTaskForm;
-const taskCtUpdateForm = document.forms.taskCtUpdateForm;
-const taskDdUpdateForm = document.forms.taskDdUpdateForm;
-const newTaskGroupForm = document.forms.newTaskGroupForm;
-const modalTask = document.getElementById('id_task_u_form-task');
-const modalDueDate = document.getElementById('id_task_u_form-due_date');
-const modalCheck = document.getElementById('id_completed');
-const modalCreatedBy = document.getElementById('created_by');
-const modalDateCreated = document.getElementById('date_created');
-const modalCompletedBy = document.getElementById('completed_by');
-const modalDateCompleted = document.getElementById('date_completed');
-const modalDeleteTask = document.getElementById('deleteTask');
-const assignedToElm = document.getElementById('assignedTo');
-
-
-/*
-window.addEventListener('DOMContentLoaded', () => {
-    // https://stackoverflow.com/questions/23593052/format-javascript-date-as-yyyy-mm-dd
-    let today = new Date();
-    const offset = today.getTimezoneOffset();
-    today = new Date(today.getTime() - (offset * 60 * 1000));
-    today = today.toISOString().split('T')[0];
-
-    let eventDate = document.getElementById('_eventDate').value;
-    eventDate = new Date(eventDate).toISOString().split('T')[0];
-    modalDueDate.setAttribute('min', today);
-    modalDueDate.setAttribute('max', eventDate);
-
-    // console.log(window.location.pathname);
-});
-*/
-
+// vars
 let orgTask = null;
 let orgDueDate = null;
 let taskCtChanged = false;
@@ -65,23 +31,6 @@ offcanvas.addEventListener('hidden.bs.offcanvas', () => {
     modalDueDate.removeEventListener('change', listenToDateChange);
 });
 
-/*
-newTaskForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const url = window.location.pathname;
-    const callback = async (data) => {
-        let task = data['task'];
-        let msg = data['msg'];
-        createTaskElm(task);
-        hideBSPopup('newTaskModal');
-        notifyAutoHide(msg.content, msg.tag);
-    };
-    const formData = new FormData(newTaskForm);
-    const task = loadFormData(formData);
-    _fetch(url, callback, 'POST', task);
-});
-*/
-
 [taskCtUpdateForm, taskDdUpdateForm].forEach(form => {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -97,20 +46,6 @@ newTaskForm.addEventListener('submit', (e) => {
         _fetch(url, callback, 'POST', data);
     });
 });
-
-/*
-newTaskGroupForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const url = window.location.pathname;
-    const callback = async (msg) => {
-        hideBSPopup('taskGroupModal');
-        notifyAutoHide(msg.content, msg.tag);
-    };
-    const formData = new FormData(newTaskGroupForm);
-    const taskGroup = loadFormData(formData);
-    _fetch(url, callback, 'POST', taskGroup);
-});
-*/
 
 async function taskDetails(taskId) {
     const url = `/organizer/tasks/${taskId}/details/`;
@@ -180,4 +115,20 @@ function updateTaskUI(taskId) {
         if (modalCheck.checked) checkbox.checked = true;
         else checkbox.checked = false;
     }
+}
+
+/**
+ * Sends a request to update task group
+ * @param {FormData} formData submitted form data
+ */
+function _renameGroup(formData) {
+    const url = taskGroupForm.action
+    const data = loadFormData(formData)
+    const callback = async (msg) => {
+        hideBSPopup('taskGroupModal')
+        notifyAutoHide(msg.content, msg.tag)
+        updateTaskGroupUI(formData.get('task_group_id'), formData.get('group_form-name'))
+        resetGroupForm()
+    }
+    _fetch(url, callback, 'POST', data)
 }

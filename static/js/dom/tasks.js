@@ -1,3 +1,64 @@
+// vars
+const sectionTasks = document.getElementById('sectionTasks');
+const offcanvas = document.getElementById('offcanvasTask');
+const newTaskForm = document.forms.newTaskForm;
+const taskCtUpdateForm = document.forms.taskCtUpdateForm;
+const taskDdUpdateForm = document.forms.taskDdUpdateForm;
+const taskGroupForm = document.forms.newTaskGroupForm;
+const modalTask = document.getElementById('id_task_u_form-task');
+const modalDueDate = document.getElementById('id_task_u_form-due_date');
+const modalCheck = document.getElementById('id_completed');
+const modalCreatedBy = document.getElementById('created_by');
+const modalDateCreated = document.getElementById('date_created');
+const modalCompletedBy = document.getElementById('completed_by');
+const modalDateCompleted = document.getElementById('date_completed');
+const modalDeleteTask = document.getElementById('deleteTask');
+const assignedToElm = document.getElementById('assignedTo');
+
+
+/**
+ * Fills the task group form with eisting task group data
+ * @param {Number} id id of the task group
+ * @param {HTMLElement} target clicked option
+ */
+function renameGroup(id, target) {
+    groupName = target.closest('.list-group-item').querySelector('[data-value="group-name"]').textContent
+    taskGroupForm.elements['group_form-name'].value = groupName
+    taskGroupForm.elements['task_group_id'].value = id
+    taskGroupForm.elements['submit'].innerHTML = 'Update'
+    showBSPopup('taskGroupModal')
+}
+
+/**
+ * Resets values of the task group form
+ */
+function resetGroupForm() {
+    taskGroupForm.elements['group_form-name'].value = ''
+    taskGroupForm.elements['task_group_id'].value = ''
+    taskGroupForm.elements['submit'].innerHTML = 'Create'
+}
+
+/**
+ * Updates task group DOM value
+ * @param {Number} id task group id
+ * @param {String} name task group name
+ */
+function updateTaskGroupUI(id, name) {
+    groupElm = document.getElementById(`taskGroup${id}`)
+    groupElm.querySelector('[data-value="group-name"]').innerHTML = name
+}
+
+taskGroupForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    _this = taskGroupForm
+    if (_this.elements['task_group_id'].value) {
+        _renameGroup(new FormData(_this))
+    } else {
+        _this.submit()
+    }
+})
+
+
 // fill offcanvas given task data
 function fillOffcanvas(task) {
     modalTask.value = task.task;
