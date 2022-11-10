@@ -206,7 +206,7 @@ class Event(models.Model):
     chatroom = models.OneToOneField(ChatRoom, on_delete=SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.event_name} (organizer: {self.organizer})'
+        return self.event_name
     
 
 class Review(models.Model):

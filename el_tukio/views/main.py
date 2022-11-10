@@ -338,18 +338,72 @@ def event_chatroom(request, event_id, chat_with=None):
 
 
 @login_required
-def calendar(request):
-    now = DT.datetime.now()
-    today  = DT.datetime.date
-    curr_month_num_days = CAL.month(now.year, now.month)[1]
-    print(CAL.month(now.year, now.month))
-    # print(CAL.monthrange(now.year, now.month))
-    # print(CAL.firstweekday())
+def calendar(request, yy=None, mm=None, dd=None):
+    dt = prev_year = prev_month = next_year = next_month = None
+
+    if yy and mm and dd:        
+        dt = DT.datetime(yy, mm, dd)
+    elif yy and mm:
+        dt = DT.datetime(yy, mm, 1)
+    else:
+        dt = DT.datetime.now()
+        yy = dt.year
+        mm = dt.month
+
+    if 1 < mm < 12:
+        prev_month = mm - 1
+        next_month = mm + 1
+        prev_year = next_year = yy
+
+    elif mm == 1:
+        prev_month = 12
+        prev_year = yy - 1
+        next_month = mm + 1
+        next_year = yy
+
+    elif mm == 12:
+        prev_month = mm - 1
+        prev_year = yy
+        next_month = 1
+        next_year = yy + 1
+
+    # calendar
+    first_day = dt.date().replace(day=1)    # first day of month
+    week_pos = first_day.weekday()  # day of week
+    num_skip = range(week_pos)  # number of cells to skip
+    num_days = CAL.monthrange(dt.year, dt.month)[1] # number of days in month
+    month_days = range(1, (num_days+1))
+
+    # queries
+    user = request.user
+    due_tasks = []
+    due_bills = []
+ 
+    # tasks & bills to be paid
+    if user.is_organizer:
+        events = user.organizer.event_set.all()
+        for event in events:
+            tasks = event.task_set.all()
+            expenses = event.expense_set.all()
+            for task in tasks:
+                if not task.completed and task.due_date == dt.date():
+                    due_tasks.append(task)
+            for xp in expenses:
+                if not xp.balance_cleared and xp.date_budgeted.date() <= dt.date():
+                    due_bills.append(xp)
+
     context = {
-        'month': now.strftime('%B'),
-        'year': now.year,
-        'today': today,
+        'active_dt': dt,
+        'prev_month': prev_month,
+        'next_month': next_month,
+        'prev_year': prev_year,
+        'next_year': next_year,
+        'num_skip': num_skip,
+        'month_days': month_days,
     }
+    if user.is_organizer:
+        context['due_tasks'] = due_tasks
+        context['due_bills'] = due_bills
     return render(request, 'main/calendar.html', context)
 
 

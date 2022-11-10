@@ -193,17 +193,24 @@ form {
 }
 
 .calendar-body > * > *{
-    width: var(--cell-size, 40px);
-    height: var(--cell-size, 40px);
+    width: calc(-4px + var(--cell-size, 40px));
+    height: calc(-4px + var(--cell-size, 40px));
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #000;
+    border-radius: 50%;
+}
+
+.calendar-body > *:hover > * {
+    color: #000;
+    background-color: #c5dcff;
 }
 
 .calendar-body > *.active > * {
-    border-radius: 50%;
     color: #fff;
     background-color: #0d6efd;
+    pointer-events: none;
 }
 
 .calendar-header-months > * {
@@ -211,6 +218,12 @@ form {
     color: rgba(255 255 255 / 0.6);
 }
 
+.calendar-header-months > *:hover {
+    color: rgba(255 255 255 / 0.6);
+    text-decoration: underline;
+}
+
 .calendar-header-months>*.active {
     color: #fff;
+    pointer-events: none;
 }

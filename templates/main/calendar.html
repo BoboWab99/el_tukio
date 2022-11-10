@@ -7,39 +7,101 @@
 <h5 class="mt-4 mb-5">My custom calendar</h5>
 
 <div class="row row-cols-2">
+    {% comment %} *** Due items *** {% endcomment %}
     <div class="col">
         <div class="todays text-start">
-            <h3 class="text-uppercase mb-4">Wednesday <br>November 11th</h3>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item px-0">Activity one</li>
-                <li class="list-group-item px-0">Activity two</li>
-                <li class="list-group-item px-0">Activity three</li>
+            <h3 class="text-uppercase mb-4">{{ active_dt|date:"l" }} <br>{{ active_dt|date:"F jS" }}</h3>
+            <ul class="list-group">
+                {% comment %} Tasks {% endcomment %}
+                <h6 class="text-danger text-decoration-underline mb-0">Tasks due today</h6>
+                {% for task in due_tasks %}
+                <li class="list-group-item border-0 px-0">
+                    <div>{{ task.task }}</div>
+                    <span class="text-primary" title="Due date">
+                        <i class="fa-regular fa-calendar"></i>
+                        {{ task.due_date }}
+                    </span>
+                    <button class="btn btn-sm btn-info px-1 py-0">
+                        {% if task.task_group %}
+                        {{ task.task_group }}
+                        {% else %}
+                        Tasks
+                        {% endif %}
+                    </button>
+                    <button class="btn btn-sm btn-secondary px-1 py-0">
+                        {{ task.event }}
+                    </button>
+                </li>
+                {% empty %}
+                <div class="text-success mt-2">No tasks due!</div>
+                {% endfor %}
+
+                {% comment %} Bills/expenses {% endcomment %}
+                <h6 class="text-danger text-decoration-underline mb-0 mt-4">Bills not settled yet</h6>
+                {% for xp in due_bills %}
+                <li class="list-group-item border-0 px-0">
+                    <div>
+                        {{ xp.description }}
+                        <span>Cost: <strong>{{ xp.total_cost }}</strong></span>
+                        <span>Paid: <strong>{{ xp.total_paid }}</strong></span>
+                    </div>
+                    <span class="text-primary" title="Date recorded">
+                        <i class="fa-solid fa-pen"></i>
+                        {{ xp.date_budgeted|date }}
+                    </span>
+                    <button class="btn btn-sm btn-info px-1 py-0">
+                        {% if xp.expense_category %}
+                        {{ xp.expense_category }}
+                        {% else %}
+                        General expenses
+                        {% endif %}
+                    </button>
+                    <button class="btn btn-sm btn-secondary px-1 py-0">
+                        {{ xp.event }}
+                    </button>
+                    {% empty %}
+                    <div class="text-success mt-2">All events' bills settled!</div>
+                    {% endfor %}
+                </li>
+
+                {% comment %} Chats {% endcomment %}
+                <h6 class="text-danger text-decoration-underline mb-0 mt-4">New chats</h6>
+                {% comment %} Guests without confirmation {% endcomment %}
+                <h6 class="text-danger text-decoration-underline mb-0 mt-4">Guests not confirmed</h6>
             </ul>
         </div>
     </div>
+
+    {% comment %} *** Calendar *** {% endcomment %}
 
     <div class="col">
         <div class="calendar rounded-md overflow-hidden border border-info">
             <div class="calendar-header bg-primary text-white rounded-top">
                 <div class="calendar-header-highlight d-flex align-items-center justify-content-between py-4 px-3">
-                    <div class="prev-month"><i class="fa-solid fa-chevron-left"></i></div>
-                    <div class="month-info fw-bold text-uppercase">{{ month }} {{ year }}</div>
-                    <div class="next-month"><i class="fa-solid fa-chevron-right"></i></div>
+                    <a class="prev-month text-white" href="{% url 'calendar' yy=prev_year mm=prev_month %}">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </a>
+                    <div class="month-info fw-bold text-uppercase">
+                        {{ active_dt|date:"F" }} {{ active_dt.year }}
+                    </div>
+                    <a class="next-month text-white" href="{% url 'calendar' yy=next_year mm=next_month %}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
                 </div>
 
                 <div class="calendar-header-months d-flex align-items-center justify-content-between text-uppercase py-2 px-3" style="background: #1467e1">
-                    <small>Jan</small>
-                    <small>Feb</small>
-                    <small>Mar</small>
-                    <small>Apr</small>
-                    <small>May</small>
-                    <small>Jun</small>
-                    <small>Jul</small>
-                    <small>Aug</small>
-                    <small>Sep</small>
-                    <small>Oct</small>
-                    <small class="active">Nov</small>
-                    <small>Dec</small>
+                    <a role="button" class="{% if active_dt.month == 1 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=1 %}">Jan</a>
+                    <a role="button" class="{% if active_dt.month == 2 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=2 %}">Feb</a>
+                    <a role="button" class="{% if active_dt.month == 3 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=3 %}">Mar</a>
+                    <a role="button" class="{% if active_dt.month == 4 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=4 %}">Apr</a>
+                    <a role="button" class="{% if active_dt.month == 5 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=5 %}">May</a>
+                    <a role="button" class="{% if active_dt.month == 6 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=6 %}">Jun</a>
+                    <a role="button" class="{% if active_dt.month == 7 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=7 %}">Jul</a>
+                    <a role="button" class="{% if active_dt.month == 8 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=8 %}">Aug</a>
+                    <a role="button" class="{% if active_dt.month == 9 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=9 %}">Sep</a>
+                    <a role="button"class="{% if active_dt.month == 10 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=10 %}">Oct</a>
+                    <a role="button"class="{% if active_dt.month == 11 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=11 %}">Nov</a>
+                    <a role="button"class="{% if active_dt.month == 12 %}active{% endif %}" href="{% url 'calendar' yy=active_dt.year mm=12 %}">Dec</a>
                 </div>
             </div>
 
@@ -54,41 +116,17 @@
             </div>
 
             <div class="calendar-body">
-                <div class="blank-start"></div>
-                <div class="date">1</div>
-                <div class="date">2</div>
-                <div class="date">3</div>
-                <div class="date">4</div>
-                <div class="date">5</div>
-                <div class="date">6</div>
-                <div class="date">7</div>
-                <div class="date">8</div>
-                <div class="date">9</div>
-                <div class="date">10</div>
-                <div class="date active"><span>11</span></div>
-                <div class="date">12</div>
-                <div class="date">13</div>
-                <div class="date">14</div>
-                <div class="date">15</div>
-                <div class="date">16</div>
-                <div class="date">17</div>
-                <div class="date">18</div>
-                <div class="date">19</div>
-                <div class="date">20</div>
-                <div class="date">21</div>
-                <div class="date">22</div>
-                <div class="date">23</div>
-                <div class="date">24</div>
-                <div class="date">25</div>
-                <div class="date">26</div>
-                <div class="date">27</div>
-                <div class="date">28</div>
-                <div class="date">29</div>
-                <div class="date">30</div>
-                <div class="blank-end"></div>
+                {% for e in num_skip %}
+                <div class="blank"></div>
+                {% endfor %}
+                {% for dd in month_days %}
+                <div class="date {% if active_dt.day == dd %}active{% endif %}">
+                    <a role="button" href="{% url 'calendar' yy=active_dt.year mm=active_dt.month dd=dd %}">{{ dd }}</a>
+                </div>
+                {% endfor %}
             </div>
             <div class="calendar-footer rounded-bottom px-3 py-2">
-
+                <a href="{% url 'calendar' %}" class="btn btn-sm btn-light text-primary fw-bold py-1">Today</a>
             </div>
         </div>
     </div>

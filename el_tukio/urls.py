@@ -23,6 +23,8 @@ urlpatterns = [
     path('events/<int:event_id>/chatroom/', main.event_chatroom, name='event-chatroom'),
     path('events/<int:event_id>/chatroom/chat-with/<int:chat_with>/', main.event_chatroom, name='event-chatroom'),
     path('my/calendar/', main.calendar, name='calendar'),
+    path('my/calendar/<int:yy>/<int:mm>/', main.calendar, name='calendar'),
+    path('my/calendar/<int:yy>/<int:mm>/<int:dd>/', main.calendar, name='calendar'),
     # path('csrf-token/', main.get_csrf)
 ]
 
