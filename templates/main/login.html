@@ -4,29 +4,36 @@
 {% block title %} ElTukio | Login {% endblock %}
 
 {% block body %}
-<div class="container center">
-    <h2 class="mb-4">User Login</h2>
+<div class="p-body">
+    <h5 class="text-center mb-0 mt-2"><a href="{% url 'home' %}">ElTukio</a> | User Login</h5>
 
-    <form action="{% url 'login' %}" class="mb-5" method="POST" novalidate>
+    <form action="{% url 'login' %}" class="mb-3 p-5" method="POST" novalidate>
         {% csrf_token %}
 
-        {% for field in form.visible_fields %}
-        <div class="form-group mb-3">
-            {{ field.label_tag }}
-            {% render_field field class+="form-control" %}
-            {% for error in field.errors %}
-            <span class="text-danger">{{ error }}</span>
-            {% endfor %}
+        <div class="card rounded-md shadow">
+            <div class="card-body p-4">
+                <div class="form-field mb-2">
+                    {{ form.username.label_tag }}
+                    {% render_field form.username class+="form-control" %}
+                </div>
+                <div class="form-field mb-2">
+                    {{ form.password.label_tag }}
+                    {% render_field form.password class+="form-control" %}
+                </div>
+                 <div class="cta d-flex justify-content-center gap-sm mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="me-2">Login</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
 
-    <div class="mb-5">
+    <div class="text-center">
         <span>Don't have an account yet?</span>
         <a href="{% url 'register' %}">Create account</a>
     </div>
-    <a class="btn btn-secondary" href="{% url 'home' %}">Go back Home</a>
 </div>
 
 {% endblock %}

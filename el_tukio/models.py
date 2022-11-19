@@ -10,6 +10,21 @@ from django.db.models.signals import m2m_changed
 
 from phonenumber_field.modelfields import PhoneNumberField
 from PIL import Image
+import os
+
+
+class Location(models.Model):
+    route = models.CharField(help_text='Road/Street name', max_length=255)
+    neighbourhood = models.CharField(help_text='Neighbourhood/Estate', max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255)
+    county = models.CharField(help_text='State/Province/County', max_length=255)
+    postal_code = models.CharField(max_length=255, blank=True, null=True)
+    country = models.CharField(max_length=255)
+    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+
+    def __string__(self):
+        return f'{self.route}, {self.city}, {self.country}'
 
 
 class User(AbstractUser):
@@ -21,9 +36,17 @@ class User(AbstractUser):
 
         __empty__ = _('(Unkown)')
 
+    class AccountType(models.IntegerChoices):
+        PERSONAL = 1, _('Personal')
+        ORGANIZATION = 2, _('Organization')
+        
+        __empty__ = _('(Unkown)')
+
     user_type = models.SmallIntegerField(blank=True, null=True, choices=UserType.choices)
     phone_number = PhoneNumberField(blank=True, null=True, unique=True)
     profile = models.ImageField(default='default.png', upload_to='profile_pics')
+    account_type = models.SmallIntegerField(blank=True, null=True, choices=UserType.choices)
+    location = models.OneToOneField(Location, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
     def is_organizer(self):
@@ -38,8 +61,15 @@ class User(AbstractUser):
         return self.user_type == self.UserType.VENDOR
 
     @property
+    def user_role(self):
+        if self.is_organizer or self.is_planner:
+            return self.get_user_type_display()
+        elif self.is_vendor:
+            return self.vendor.category.name
+
+    @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        return self.get_full_name()
 
     def get_absolute_url(self):
         """Return the url to access a particular user"""
@@ -68,11 +98,41 @@ class Comment(models.Model):
     comment = models.CharField(max_length=500)
     date_posted = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.user.full_name}'s comment"
+
 
 class FileUpload(models.Model):
     user = models.ForeignKey(User, on_delete=CASCADE)
     file = models.FileField(upload_to='uploads/')
     date_uploaded = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    def __str__(self):
+        return self.filename
+
+
+class LegalDocument(FileUpload):
+    class DocumentType(models.IntegerChoices):
+        BUSINESS_PERMIT = 1, _('Business permit or license')
+
+    title = models.SmallIntegerField(choices=DocumentType.choices)
+
+    @property
+    def title_display(self):
+        return self.get_title_display()
+
+    def __string__(self):
+        return self.filename
+
+
+class BusinessProfile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    business_name = models.CharField(max_length=255)
+    docs = models.ManyToManyField(LegalDocument)
 
 
 class ChatRoom(models.Model):
@@ -83,17 +143,6 @@ class ChatRoom(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True)
     type = models.SmallIntegerField(choices=Type.choices)
     members = models.ManyToManyField(User, blank=True, related_name='chatroom')
-
-    # def clean(self, *args, **kwargs):
-    #     if self.members.count() == 2:
-    #         raise ValidationError(_("Personal chat can't have more than 2 people!"))
-    #     super(ChatRoom, self).clean(*args, **kwargs)
-
-    # def save(self, *args, **kwargs):
-    #     if self.type == self.Type.PERSONAL and self.members.count() == 2:
-    #         raise ValidationError(_("Personal chat can't have more than 2 people!"))
-    #     else:
-    #         super().save(*args, **kwargs)
 
 
 # limit members in personal chat
@@ -120,22 +169,14 @@ class ChatMessage(models.Model):
         ordering = ['date_sent']
 
 
-# class ChatMessageReply(ChatMessage):
-#     reference = models.ForeignKey(ChatMessage, on_delete=CASCADE, related_name='chat_reply_message')
-
-#     class Meta:
-#         verbose_name = 'Chat Message Reply'
-#         verbose_name_plural = 'Chat Message Replies'
-
-
 class VendorCategory(models.Model):
     """Model representing a wedding vendor category. 
     Vendor categories are added by the Admin in the database. """
     name = models.CharField( max_length=200, help_text='Select a category (EG: Venues)')
 
     class Meta:
-        verbose_name = 'Vendor Category'
-        verbose_name_plural = 'Vendor Categories'
+        verbose_name = _('Vendor Category')
+        verbose_name_plural = _('Vendor Categories')
 
     def __str__(self):
         return self.name
@@ -237,7 +278,8 @@ class Contract(models.Model):
     event = models.ForeignKey(Event, on_delete=CASCADE)
     contractor = models.ForeignKey(User, on_delete=CASCADE, related_name='contractor', help_text='Event Organizer|Planner giving the contract.')
     contractee = models.ForeignKey(User, on_delete=CASCADE, related_name='contractee', help_text='Planner|Vendor receiving the contract')
-    terms = models.CharField(max_length=5000, help_text='Contract terms of agreement')
+    contract = models.FileField(help_text='Contract terms of agreement')
+    comment = models.CharField(max_length=5000, help_text='Any additional comment on the contract?')
     status = models.SmallIntegerField(choices=Status.choices, default=Status.PENDING)
     date_sent = models.DateTimeField(auto_now_add=True, help_text='Time a contract is sent to the contractee')
     date_signed = models.DateTimeField(help_text='Time the contractee signs the contract', blank=True, null=True)

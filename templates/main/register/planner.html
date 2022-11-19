@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Create account | Organizer | ElTukio{% endblock title %}
+
+{% block body %}
+
+<div class="p-body">
+    <h5 class="text-center mb-0 mt-2"><a href="{% url 'home' %}">ElTukio</a> | Create account | Planner</h5>
+    <form method="post">
+        {% csrf_token %}
+
+        <div id="carouselRegisterPlanner" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-touch="false" data-bs-interval="false">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="p-5">
+                        <div class="card rounded-md shadow">
+                            <div class="card-body p-4">
+                                <h6 class="mb-4">Account details</h6>
+                                <div class="form-field mb-2">
+                                    {{ form.username.label_tag }}
+                                    {% render_field form.username class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.password1.label_tag }}
+                                    {% render_field form.password1 class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.password2.label_tag }}
+                                    {% render_field form.password2 class+='form-control' %}
+                                </div>
+                                <div class="cta d-flex justify-content-end gap-sm mt-3">
+                                    <button type="button" class="btn btn-primary pe-2" data-bs-target="#carouselRegisterPlanner" data-bs-slide-to="1" aria-label="Personal details">
+                                        <span class="me-2">Personal info</span>
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="p-5">
+                        <div class="card rounded-md shadow">
+                            <div class="card-body p-4">
+                                <h6 class="mb-4">Personal details</h6>
+                                <div class="form-field mb-2">
+                                    {{ form.first_name.label_tag }}
+                                    {% render_field form.first_name class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.last_name.label_tag }}
+                                    {% render_field form.last_name class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.phone_number.label_tag }}
+                                    {% render_field form.phone_number class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.email.label_tag }}
+                                    {% render_field form.email class+='form-control' %}
+                                </div>
+                                <div class="cta d-flex justify-content-end gap-sm mt-3">
+                                    <button type="button" class="btn btn-secondary ps-2" data-bs-target="#carouselRegisterPlanner" data-bs-slide-to="0" aria-label="Account details">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                        <span class="ms-2">Account info</span>
+                                    </button>
+                                    <button type="button" class="btn btn-primary pe-2" data-bs-target="#carouselRegisterPlanner" data-bs-slide-to="2" aria-label="Event details">
+                                        <span class="me-2">Business</span>
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="p-5">
+                        <div class="card rounded-md shadow">
+                            <div class="card-body p-4">
+                                <h6 class="mb-4">Business profile | Description</h6>
+                                <div class="form-field mb-2">
+                                    {{ form.description.label_tag }}
+                                    {% render_field form.description class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.services_offered.label_tag }}
+                                    {% render_field form.services_offered class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.city.label_tag }}
+                                    {% render_field form.city class+='form-control' %}
+                                </div>
+                                <div class="form-field mb-2">
+                                    {{ form.location.label_tag }}
+                                    {% render_field form.location class+='form-control' %}
+                                </div>
+                                <div class="cta d-flex justify-content-end gap-sm mt-3">
+                                    <button type="button" class="btn btn-secondary ps-2" data-bs-target="#carouselRegisterPlanner" data-bs-slide-to="1" aria-label="Personal details">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                        <span class="ms-2">Personal info</span>
+                                    </button>
+                                    <button type="submit" class="btn btn-primary pe-2">
+                                        <span class="me-2">Create account</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock body %}

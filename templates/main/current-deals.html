@@ -6,30 +6,49 @@
         class="nav-link {% if active == 'pending' %}text-success{% endif %}">
         <i class="fs-5 fa-solid fa-file-circle-plus"></i>
         <span class="ms-1">New</span>
+        <span class="badge rounded-pill bg-danger">
+            {{ pending_count }}
+            <span class="visually-hidden">Number of new deals</span>
+        </span>
     </a>
     <a href="{% url 'current-deals' status='accepted' %}"
         class="nav-link {% if active == 'accepted' %}text-success{% endif %}">
         <i class="fs-5 fa-solid fa-sun"></i>
         <span class="ms-1">Active</span>
+        <span class="badge rounded-pill bg-danger">
+            {{ accepted_count }}
+            <span class="visually-hidden">Number of accepted deals</span>
+        </span>
     </a>
     <a href="{% url 'current-deals' status='declined' %}"
         class="nav-link {% if active == 'declined' %}text-success{% endif %}">
         <i class="fa-solid fa-arrow-trend-down"></i>
         <span class="ms-1">Declined</span>
+        <span class="badge rounded-pill bg-danger">
+            {{ declined_count }}
+            <span class="visually-hidden">Number of declined deals</span>
+        </span>
     </a>
 </nav>
 
-<h2 class="mb-5">My Current deals</h2>
+<h2 class="mb-5 text-capitalize text-center">{{ active }} deals</h2>
+
 <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center">
     {% for deal in mydeals %}
-    <div class="col">
-        <a href="{% url 'organizer-event-details' deal.event.id %}" class="card shadow">
+    <div class="col text-center">
+        <div class="card rounded-md shadow">
             <div class="card-body p-5">
-                <span class="d-block h4 mb-1">{{ deal.event.event_name }}</span>
-                <span class="d-block text-muted">{{ deal.event.event_date }}</span>
-                <span class="d-block text-muted">Organizer: {{ deal.event.organizer }}</span>
-                {% comment %} <span class="d-block text-muted">Status: {{ deal.get_status_display }}</span>
-                <span class="d-block text-muted">Terms: {{ deal.terms }}</span>
+                {% if user in deal.event.event_team.all %}
+                <a class="text-body" href="{% url 'organizer-event-details' deal.event.id %}">
+                {% else %}
+                <a class="text-body" href="#">
+                {% endif %}
+                    <span class="d-block h4 mb-1">{{ deal.event.event_name }}</span>
+                    <span class="d-block text-muted">{{ deal.event.event_date }}</span>
+                    <span class="d-block text-muted">Organizer: {{ deal.event.organizer }}</span>
+                    <span class="d-block text-muted">Status: {{ deal.get_status_display }}</span>
+                </a>
+                {% comment %} <span class="d-block text-muted">Terms: {{ deal.terms }}</span>
                 <span class="d-block text-muted">Sent: {{ deal.date_sent }}</span>
                 <span class="d-block text-muted">By: {{ deal.contractor }}</span>
                 <span class="d-block text-muted">Signed: {{ deal.date_signed }}</span>
@@ -47,8 +66,10 @@
                 </div>
                 {% endif %}
             </div>
-        </a>
+        </div>
     </div>
+    {% empty %}
+    <div class="text-danger text-center">No {{ active }} deals!</div>
     {% endfor %}
 </div>
 {% endblock content %}
@@ -62,7 +83,7 @@
                 <span class="fs-1 text-warning">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </span>
-                <p class="my-3">I understand to requirements of this deal. <br>I choose to <span id="choice" class="bg-light px-1 text-uppercase rounded">...</span> it.</p>
+                <p class="my-3">I understand the requirements of this deal. <br>I choose to <span id="choice" class="bg-light px-1 text-uppercase rounded">...</span> it.</p>
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="my-0 btn btn-outline-dark border-0" data-bs-dismiss="modal">Close</button>

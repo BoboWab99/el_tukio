@@ -13,9 +13,10 @@ def vendor_categories():
 
 class VendorRegForm(UserCreationForm):
     """Vendor registration form"""
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
     email = forms.EmailField(required=True)
+    phone_number = forms.CharField(required=True)
 
     business_name = forms.CharField(required=True)
     category = forms.ChoiceField(
@@ -46,6 +47,7 @@ class VendorRegForm(UserCreationForm):
         user.user_type = User.UserType.VENDOR
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+        user.phone_number = self.cleaned_data['phone_number']
         user.email = self.cleaned_data['email']
         user.save()
 
@@ -64,9 +66,10 @@ class VendorRegForm(UserCreationForm):
 
 class OrganizerRegForm(UserCreationForm):
     """Event organizer registration form"""
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
     email = forms.EmailField(required=True)
+    phone_number = forms.CharField(required=True)
     event_name = forms.CharField(required=True)
     event_date = forms.DateField(
         required=True,
@@ -79,6 +82,17 @@ class OrganizerRegForm(UserCreationForm):
     event_location = forms.CharField(required=False)
     guest_size = forms.IntegerField(required=True, min_value=0)
 
+    # location
+    business_name = forms.CharField(required=False)
+    route = forms.CharField(required=False)
+    neighbourhood = forms.CharField(required=False)
+    city = forms.CharField(required=False)
+    county = forms.CharField(required=False)
+    country = forms.CharField(required=False)
+    postal_code = forms.CharField(required=False)
+    longitude = forms.FloatField(required=False)
+    laitude = forms.FloatField(required=False)
+
     class Meta(UserCreationForm.Meta):
         model = User
 
@@ -88,6 +102,7 @@ class OrganizerRegForm(UserCreationForm):
         user.user_type = User.UserType.ORGANIZER
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+        user.phone_number = self.cleaned_data['phone_number']
         user.email = self.cleaned_data['email']
         user.save()
 
@@ -108,9 +123,10 @@ class OrganizerRegForm(UserCreationForm):
 
 class PlannerRegForm(UserCreationForm):
     """Event planner registration form"""
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
     email = forms.EmailField(required=True)
+    phone_number = forms.CharField(required=True)
     description = forms.CharField(
         required=True,
         widget=forms.Textarea(attrs={
@@ -135,6 +151,7 @@ class PlannerRegForm(UserCreationForm):
         user.user_type = User.UserType.PLANNER
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
+        user.phone_number = self.cleaned_data['phone_number']
         user.email = self.cleaned_data['email']
         user.save()
 
@@ -207,9 +224,9 @@ class EventForm(ModelForm):
 class ContractForm(ModelForm):
     class Meta:
         model = Contract
-        fields = ['event', 'terms']
+        fields = ['event', 'contract', 'comment']
         widgets = {
-            'terms': forms.Textarea(attrs={
+            'comment': forms.Textarea(attrs={
                 'row': 5,
                 'col': 30,
             })

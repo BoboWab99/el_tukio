@@ -1,40 +1,14 @@
-// Variables
+// vars
+/**
+ * Server
+ */
+const SERVER = 'http://127.0.0.1:8000'
 
-const SERVER = 'http://127.0.0.1:8000';
 
-const alertTypes = {
-    INFO: {
-        label: 'Info',
-        class: 'alert-primary',
-        icon: '#info-fill'
-    },
-    SUCCESS: {
-        label: 'Success',
-        class: 'alert-success',
-        icon: '#check-circle-fill'
-    },
-    WARNING: {
-        label: 'Warning',
-        class: 'alert-warning',
-        icon: '#exclamation-triangle-fill'
-    },
-    ERROR: {
-        label: 'Error',
-        class: 'alert-danger',
-        icon: '#exclamation-triangle-fill'
-    },
-}
-
-const notifyDivSelector = '#notifications .container';
-
-// Event listeners
-
-window.addEventListener('DOMContentLoaded', () => {
-    notifySessionMessages();
-});
-
-// get csrf token
-
+/**
+ * Retrieves csrf token
+ * @returns token string
+ */
 async function csrfToken() {
     const url = `${SERVER}/csrf-token/`;
     let response = await fetch(url);
@@ -44,9 +18,13 @@ async function csrfToken() {
     return csrfToken;
 }
 
-
-// fetch request helper function
-
+/**
+ * Fetch API helper function
+ * @param {String} url target url
+ * @param {Function} callback executed on success - takes in the data param
+ * @param {String} method HTTP request method
+ * @param {String} data JSON string
+ */
 async function _fetch(url, callback, method='GET', data) {
     let headers = new Headers({
         'Content-Type': 'application/json',
@@ -83,7 +61,7 @@ async function _fetch(url, callback, method='GET', data) {
 /**
  * format date string to 'dd/mm/yyyy' EG: '25/12/2000'
  * @param {String} dateStr - date string
- * @returns {String} 
+ * @returns formtted date string
  */
 function formatDate(dateStr) {
     if (dateStr == null) return '';
@@ -96,75 +74,6 @@ function formatDate(dateStr) {
     let formattedDate = `${dd}/${mm}/${yyyy}`;
     return formattedDate;
 }
-
-
-// Notifications
-
-// error
-
-function notifyError(message, autohide=true) {
-    if (autohide) notifyAutoHide(message, 'ERROR');
-    else notify(message, 'ERROR');
-}
-
-// success
-
-function notifySuccess(message, autohide=true) {
-    if (autohide) notifyAutoHide(message, 'SUCCESS');
-    else notify(message, 'SUCCESS');
-}
-
-// info
-
-function notifyInfo(message, autohide=true) {
-    if (autohide) notifyAutoHide(message, 'INFO');
-    else notify(message, 'INFO');
-}
-
-// warning
-
-function notifyWarning(message, autohide=true) {
-    if (autohide) notifyAutoHide(message, 'WARNING');
-    else notify(message, 'WARNING');
-}
-
-// notify autohide
-
-async function notifyAutoHide(message, alertType='INFO', after=3000) {
-    await notify(message, alertType);
-    setTimeout(() => {
-        document.querySelector(notifyDivSelector).querySelector('[data-bs-dismiss="alert"]').click();
-    }, after);
-}
-
-// notify
-
-async function notify(message, alertType='INFO') {  
-    let notification = `
-   <div class="alert ${alertTypes[alertType].class} alert-dismissible fade show d-flex shadow mt-1" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="${alertTypes[alertType].label}">
-        <use xlink:href="${alertTypes[alertType].icon}"/>
-        </svg>
-        <div>${message}</div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-   </div>
-   `;
-    document.querySelector(notifyDivSelector).innerHTML = notification;
-}
-
-
-// Session notifications
-
-function notifySessionMessages() {
-    if (document.querySelector('.session-message')) {
-        let message = document.querySelector('.session-message');
-        notifyAutoHide(
-            message.querySelector('[name="message"]').value,
-            message.querySelector('[name="alertType"]').value
-        )
-    }
-}
-
 
 /**
  * Get JSON string containing submitted form data

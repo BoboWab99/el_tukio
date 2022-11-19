@@ -11,8 +11,9 @@ urlpatterns = [
     path('logout/', main.user_logout, name='logout'),
     path('vendors/', main.vendors, name='vendors'),
     path('planners/', main.planners, name='planners'),
-    path('vendors/<int:vendor_id>/details/', main.vendor_details, name='vendor-details'),
-    path('planners/<int:planner_id>/details/', main.planner_details, name='planner-details'),
+    # path('vendors/<int:vendor_id>/details/', main.vendor_details, name='vendor-details'),
+    # path('planners/<int:planner_id>/details/', main.planner_details, name='planner-details'),
+    path('sellers/<int:user_id>/details/', main.seller_details, name='seller-details'),
     path('<str:user_type>/bookmarks/', main.bookmarks, name='bookmarks'),
     path('users/<int:user_id>/bookmark/', main.bookmark, name='bookmark'),
     path('users/<int:user_id>/bookmark/remove/', main.remove_bookmark, name='remove-bookmark'),
@@ -25,7 +26,7 @@ urlpatterns = [
     path('my/calendar/', main.calendar, name='calendar'),
     path('my/calendar/<int:yy>/<int:mm>/', main.calendar, name='calendar'),
     path('my/calendar/<int:yy>/<int:mm>/<int:dd>/', main.calendar, name='calendar'),
-    # path('csrf-token/', main.get_csrf)
+    path('csrf-token/', main.get_csrf)
 ]
 
 urlpatterns += [

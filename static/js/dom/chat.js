@@ -15,6 +15,7 @@ function replyTo(id, target) {
     let popup = createPopup(data)
     if ((_alert = wrapper.querySelector('.alert'))) wrapper.removeChild(_alert)
     wrapper.insertBefore(popup, form)
+    form.elements['message'].focus()
 }
 
 /**

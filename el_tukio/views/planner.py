@@ -13,7 +13,7 @@ from el_tukio.utils.decorators import planner_required
 class Register(CreateView):
     # model = User
     form_class = PlannerRegForm
-    template_name = 'main/register/register.html'
+    template_name = 'main/register/planner.html'
     extra_context = {'title': 'Event planner Registration'}
 
     def form_valid(self, form):

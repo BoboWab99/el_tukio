@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, F
+from django.db import transaction
 
 import json
 import datetime as DT
@@ -22,7 +23,7 @@ from el_tukio.utils.messages import *
 
 class Register(CreateView):
     form_class = OrganizerRegForm
-    template_name = 'main/register/register.html'
+    template_name = 'main/register/organizer.html'
     extra_context = {'title': 'Event organizer Registration'}
 
     def form_valid(self, form):
@@ -54,6 +55,7 @@ class Events(CreateView):
         context["events"] = Event.objects.filter(organizer_id=self.request.user.organizer.user_id)
         return context
     
+    @transaction.atomic
     def form_valid(self, form):
         event = Event.objects.create(
             organizer=self.request.user.organizer,
@@ -63,7 +65,16 @@ class Events(CreateView):
             event_location=form.cleaned_data['event_location'],
             guest_size=form.cleaned_data['guest_size']
         )
+        # create event chatroom
+        chatroom = ChatRoom.objects.create(
+            name=f'{event.event_name} chatroom',
+            type=ChatRoom.Type.GROUP
+        )
+        # add organizer to chatroom
+        chatroom.members.add(self.request.user)
+        event.chatroom = chatroom
         event.save()
+        # done
         messages.success(self.request, 'New event created!')
         return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
@@ -109,26 +120,21 @@ def event_update(request, event_id):
     return redirect('organizer-events')
 
 
-@organizer_required
+@planner_or_organizer_required
 def event_team(request, event_id):
     event = Event.objects.get(id=event_id)
-    team_ids = Contract.objects.filter(event_id=event_id, status=Contract.Status.ACCEPTED).values_list('contractee_id')
-    team = User.objects.filter(id__in=team_ids)
-
-    for member in team:
-        event.event_team.add(member)
-    event.save()
-    print(event.event_team.all())
-
+    event_team = event.event_team.all()
+    contracts = Contract.objects.filter(event_id=event_id).exclude(status=Contract.Status.ACCEPTED)
     context = {
-        'team': team, 
         'event': event,
+        'team': event_team,
+        'contracts': contracts,
         'active': 'team'
     }
     return render(request, 'organizer/event-team.html', context)
 
 
-@organizer_required
+@planner_or_organizer_required
 def tasks(request, event_id, group_id=None):
     TASK_FORM_PREFIX = 'task_form'
     TASK_U_FORM_PREFIX = 'task_u_form'
@@ -139,7 +145,7 @@ def tasks(request, event_id, group_id=None):
     task_ct_update_form = TaskContentUpdateForm(prefix=TASK_U_FORM_PREFIX)
     task_dd_update_form = TaskDueDateUpdateForm(event_date=event.event_date, prefix=TASK_U_FORM_PREFIX)
     task_group_form = TaskGroupForm(prefix=TASK_GRP_FORM_PREFIX)
-    tasks = Task.objects.filter(event_id=event_id).order_by('completed')
+    tasks = Task.objects.filter(event_id=event_id).order_by('completed').exclude(deleted=True)
     task_groups = TaskGroup.objects.filter(event_id=event_id)
     all_count = Task.objects.filter(event_id=event_id).count()
     active_group = 0
@@ -249,7 +255,7 @@ def tasks(request, event_id, group_id=None):
                     return JsonResponse(msg.error('Error!'))
 
 
-@organizer_required
+# @organizer_required
 def task_details(request, task_id):
     task = Task.objects.filter(id=task_id)
     taskValues = task.values(
@@ -269,15 +275,13 @@ def task_details(request, task_id):
         completed_by_fname=F('completed_by__first_name'),
         completed_by_lname=F('completed_by__last_name')
     )[0]
-
-    if task[0].assigned_to and task[0].assigned_to.is_vendor:
-        taskValues['assigned_to_business'] = task[0].assigned_to.vendor.business_name
-    elif task[0].assigned_to and task[0].assigned_to.is_planner:
-        taskValues['assigned_to_business'] = 'Planner'
+    task = task[0]
+    if task.assigned_to:
+        taskValues['assigned_to_business'] = task.assigned_to.user_role
     return JsonResponse(taskValues)
 
 
-@organizer_required
+# @organizer_required
 def complete_task(request, task_id):
     task = Task.objects.get(id=task_id)
     if task.completed:
@@ -292,14 +296,16 @@ def complete_task(request, task_id):
     return JsonResponse(msg.success('Task status changed!'))
 
 
-@organizer_required
+# @organizer_required
 def delete_task(request, task_id):
     task = Task.objects.get(id=task_id)
-    task.delete()
+    task.deleted = True
+    task.date_deleted = DT.datetime.now()
+    task.save()
     return JsonResponse(msg.success('Task deleted!'))
 
 
-@organizer_required
+@planner_or_organizer_required
 def assign_to(request, task_id, member_id):
     task = Task.objects.get(id=task_id)
     task.assigned_to = User.objects.get(id=member_id)
@@ -307,7 +313,7 @@ def assign_to(request, task_id, member_id):
     return JsonResponse(msg.success('Task assigned!'))
 
 
-@organizer_required
+@planner_or_organizer_required
 def assign_to_remove(request, task_id):
     task = Task.objects.get(id=task_id)
     task.assigned_to = None
@@ -315,7 +321,7 @@ def assign_to_remove(request, task_id):
     return JsonResponse(msg.success('Task updated!'))
 
 
-@organizer_required
+# @organizer_required
 def delete_task_group(request, event_id, group_id, tasks_included='No'):
     group = TaskGroup.objects.get(id=group_id, event_id=event_id)
 
@@ -330,7 +336,7 @@ def delete_task_group(request, event_id, group_id, tasks_included='No'):
 
 # budget tracker
 
-@organizer_required
+@planner_or_organizer_required
 def budget_tracker(request, event_id):
     EXPENSE_FORM_PREFIX = 'exp_form'
     EXPENSE_U_FORM_PREFIX = 'exp_u_form'
@@ -390,7 +396,7 @@ def budget_tracker(request, event_id):
         return JsonResponse(msg.success('Updated!'))
 
 
-@organizer_required
+# @organizer_required
 def expense_details(request, exp_id):
     exp = Expense.objects.filter(id=exp_id).values(
         'id',
@@ -405,7 +411,7 @@ def expense_details(request, exp_id):
     return JsonResponse(exp, safe=False)
 
 
-@organizer_required
+# @organizer_required
 def delete_expense(request, id):
     Expense.objects.get(id=id).delete()
     return JsonResponse(msg.success('Deleted!'))

@@ -143,7 +143,6 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 AUTH_USER_MODEL = 'el_tukio.User'
 
 HOME_URL = 'home'
@@ -151,6 +150,8 @@ HOME_URL = 'home'
 LOGIN_URL = 'login'
 
 LOGOUT_URL = 'logout'
+
+GOOGLE_API_KEY = 'AIzaSyA41-Va7vgpvlF117SYQYd-g9RgHRLquGE'
 
 
 # Django messages

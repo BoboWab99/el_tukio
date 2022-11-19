@@ -5,7 +5,7 @@
 
 <h2 class="mb-5">My event team</h2>
 
-<table class="table text-start">
+<table class="table text-start bg-white">
     <thead>
         <tr>
             <th>Name</th>
@@ -13,12 +13,30 @@
             <th>Action</th>
         </tr>
     </thead>
+
     <tbody>
         <tr>
-            <td>{{ user.full_name }} <span class="bg-light text-success fw-bold rounded px-2">ME</span></td>
-            <td>{{ user.get_user_type_display }}</td>
-            <td>...</td>
+            <td>
+                {{ event.organizer.user.full_name }}
+                {% if event.organizer.user_id == user.id %}
+                <span class="bg-light text-success fw-bold rounded px-2">ME</span>
+                {% endif %}
+            </td>
+            <td>{{ event.organizer.user.user_role }}</td>
+            <td>
+                {% if event.organizer.user_id != user.id %}
+                <a href="{% url 'event-chatroom' event_id=event.id chat_with=event.organizer.user_id %}" class="btn btn-outline-success border-0">
+                    <i class="fa-solid fa-message"></i>
+                </a>
+                {% if event.organizer.phone_number %}
+                <a href="tel:{{ event.organizer.phone_number }}" class="btn btn-outline-primary border-0">
+                    <i class="fa-solid fa-phone"></i>
+                </a>
+                {% endif %}
+                {% endif %}
+            </td>
         </tr>
+
         {% for member in team %}
         <tr>
             <td>
@@ -26,15 +44,15 @@
                 {% if member.is_vendor %}
                 <span class="text-muted">[{{ member.vendor.business_name }}]</span>
                 {% endif %}
-            </td>
-            <td>
-                {% if member.is_planner %}
-                {{ member.get_user_type_display }}
-                {% else %}
-                {{ member.vendor.category }}
+                {% if member.id == user.id %}
+                <span class="bg-light text-success fw-bold rounded px-2">ME</span>
                 {% endif %}
             </td>
             <td>
+                {{ member.user_role }}
+            </td>
+            <td>
+                {% if member.id != user.id %}
                 <a href="{% url 'event-chatroom' event_id=event.id chat_with=member.id %}" class="btn btn-outline-success border-0">
                     <i class="fa-solid fa-message"></i>
                 </a>
@@ -43,9 +61,51 @@
                     <i class="fa-solid fa-phone"></i>
                 </a>
                 {% endif %}
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+{% if contracts %}
+<h6 class="mt-5 mb-3">Contracts sent out</h6>
+<table class="table text-start bg-white">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for x in contracts %}
+        <tr>
+            <td>
+                {{ x.contractee.full_name }}
+                {% if x.contractee.is_vendor %}
+                <span class="text-muted">[{{ x.contractee.vendor.business_name }}]</span>
+                {% endif %}
+            </td>
+            <td>
+                {{ x.contractee.user_role }}
+            </td>
+            <td>
+                {{ x.get_status_display }}
+            </td>
+            <td>
+                {% if x.contractee.phone_number %}
+                <a href="tel:{{ x.contractee.phone_number }}" class="btn btn-outline-primary border-0">
+                    <i class="fa-solid fa-phone"></i>
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
 {% endblock content %}

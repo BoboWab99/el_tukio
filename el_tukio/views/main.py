@@ -2,8 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
+from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.db import transaction
@@ -12,7 +14,7 @@ from django.db.models import Q, F
 import datetime as DT
 import calendar as CAL
 
-from setup.settings import LOGIN_URL, HOME_URL
+from setup.settings import LOGIN_URL, HOME_URL, GOOGLE_API_KEY
 from el_tukio.models import *
 from el_tukio.forms import *
 from el_tukio.utils.decorators import *
@@ -20,7 +22,7 @@ from el_tukio.utils.main import *
 
 
 def index(request):
-    return render(request, 'main/index.html')
+    return render(request, 'main/index.html', {'google_api_key': GOOGLE_API_KEY})
 
 
 def register(request):
@@ -137,13 +139,13 @@ class PasswordUpdate(UpdateView):
 
 
 def planners(request):
-    context = {'planners': Planner.objects.all()}
-    return render(request, 'main/planners.html', context)
+    context = {'vendors': Planner.objects.all()}
+    return render(request, 'main/vendors.html', context)
 
 
-def planner_details(request, planner_id):
-    context = {'seller' : Planner.objects.get(user_id=planner_id)}
-    return render(request, 'main/seller-details.html', context)
+# def planner_details(request, planner_id):
+#     context = {'seller' : Planner.objects.get(user_id=planner_id)}
+#     return render(request, 'main/seller-details.html', context)
 
 
 def vendors(request):
@@ -151,8 +153,17 @@ def vendors(request):
     return render(request, 'main/vendors.html', context)
 
 
-def vendor_details(request, vendor_id):
-    context = {'seller' : Vendor.objects.get(user_id=vendor_id)}
+# def vendor_details(request, vendor_id):
+#     context = {'seller' : Vendor.objects.get(user_id=vendor_id)}
+#     return render(request, 'main/seller-details.html', context)
+
+def seller_details(request, user_id):
+    context = {}
+    user = User.objects.get(id=user_id)
+    if user.is_planner:
+        context['seller'] = Planner.objects.get(user_id=user_id)
+    elif user.is_vendor:
+        context['seller'] = Vendor.objects.get(user_id=user_id)
     return render(request, 'main/seller-details.html', context)
 
 
@@ -213,6 +224,10 @@ def hire_seller(request, user_id):
         seller = User.objects.get(id=user_id)
         seller = Vendor.objects.get(user_id=user_id) if seller.is_vendor else Planner.objects.get(user_id=user_id)
         context = {'form': form, 'seller': seller}
+        if request.user.is_organizer:
+            context['events'] = Event.objects.filter(organizer_id=request.user.id)
+        elif request.user.is_planner:
+            context['events'] = Event.objects.filter(event_team__id=request.user.id)
         return render(request, 'main/hire-seller.html', context)
 
     form = ContractForm(request.POST)
@@ -228,14 +243,20 @@ def hire_seller(request, user_id):
     )
     contract.save()
     messages.success(request, 'Contract sent!')
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    return redirect('seller-details', user_id)
 
 
 @planner_or_vendor_required
-def current_deals(request, status='pending'):
+def current_deals(request, status='accepted'):
     _status = Contract.Status[status.upper()]
     mydeals = Contract.objects.filter(contractee_id=request.user.id, status=_status)
     context = {'mydeals': mydeals, 'active': status}
+    context['pending_count'] = Contract.objects.filter(
+        contractee_id=request.user.id, status=Contract.Status.PENDING).count()
+    context['accepted_count'] = Contract.objects.filter(
+        contractee_id=request.user.id, status=Contract.Status.ACCEPTED).count()
+    context['declined_count'] = Contract.objects.filter(
+        contractee_id=request.user.id, status=Contract.Status.DECLINED).count()
     return render(request, 'main/current-deals.html', context)
 
 
@@ -248,6 +269,11 @@ def sign_contract(request, deal_id, action):
         contract.status = status
         contract.date_signed = date_signed
         contract.save()
+
+        # add user to event team & chatroom
+        if contract.is_accepted:
+            contract.event.event_team.add(request.user)
+            contract.event.chatroom.members.add(request.user)
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -407,5 +433,5 @@ def calendar(request, yy=None, mm=None, dd=None):
     return render(request, 'main/calendar.html', context)
 
 
-# def get_csrf(request):
-#     return JsonResponse({'csrf_token': get_token(request)}, status=200)
+def get_csrf(request):
+    return JsonResponse({'csrf_token': get_token(request)}, status=200)

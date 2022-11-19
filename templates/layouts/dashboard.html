@@ -4,20 +4,26 @@
 {% block title %} ElTukio | MyDashboard {% endblock title %}
 
 {% block body %}
-<div class="layout layout-dashboard">
+<div class="layout layout-dashboard layout-{{ active }}">
     {% include 'components/header.html' %}
-    <div class="row row-cols-2">
-        <div class="col-2">
-            {% if user.is_vendor %}
-            {% include 'components/nav-vendor.html' %}
-            {% elif user.is_planner %}
-            {% include 'components/nav-planner.html' %}
-            {% elif user.is_organizer %}
-            {% include 'components/nav-organizer.html' %}
-            {% endif %}
-        </div>
-        <div class="col-10">
-            {% block content %}{% endblock %}
+    <div class="layout-dashboard-body">
+        <div class="row row-cols-2 m-0">
+            <div class="col-2 p-0 border-end">
+                <div class="layout-dashboard-sidenav p-body">
+                    {% if user.is_vendor %}
+                    {% include 'components/nav-vendor.html' %}
+                    {% elif user.is_planner %}
+                    {% include 'components/nav-planner.html' %}
+                    {% elif user.is_organizer %}
+                    {% include 'components/nav-organizer.html' %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-10 p-0">
+                <div class="layout-dashboard-content position-relative p-body bg-light">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

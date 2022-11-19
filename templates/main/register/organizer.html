@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Create account | Organizer | ElTukio{% endblock title %}
+
+{% block body %}
+
+<div class="p-body">
+    <h5 class="text-center mb-0 mt-2"><a href="{% url 'home' %}">ElTukio</a> | Create account | Organizer</h5>
+    <form method="post">
+        {% csrf_token %}
+
+        <div id="carouselRegisterOrganizer" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-touch="false" data-bs-interval="false">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="p-5">
+                        <div class="card rounded-md shadow">
+                            <div class="card-body p-4">
+                                <h6 class="mb-4">Account details</h6>
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.username.label }} {% if form.username.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.username class+='form-control' %}
+                                </label>
+
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.password1.label }} {% if form.password1.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.password1 class+='form-control' %}
+                                </label>
+
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.password2.label }} {% if form.password2.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.password2 class+='form-control' %}
+                                </label>
+
+                                <div class="cta d-flex justify-content-end gap-sm mt-3">
+                                    <button type="button" class="btn btn-primary pe-2" data-bs-target="#carouselRegisterOrganizer" data-bs-slide-to="1" aria-label="Personal details">
+                                        <span class="me-2">Personal info</span>
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="p-5">
+                        <div class="card rounded-md shadow">
+                            <div class="card-body p-4">
+                                <h6 class="mb-4">Personal details</h6>
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.first_name.label }} {% if form.first_name.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.first_name class+='form-control' %}
+                                </label>
+
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.last_name.label }} {% if form.last_name.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.last_name class+='form-control' %}
+                                </label>
+
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.phone_number.label }} {% if form.phone_number.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.phone_number class+='form-control' %}
+                                </label>
+
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.email.label }} {% if form.email.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.email class+='form-control' %}
+                                </label>
+
+                                <div class="cta d-flex justify-content-end gap-sm mt-3">
+                                    <button type="button" class="btn btn-secondary ps-2" data-bs-target="#carouselRegisterOrganizer" data-bs-slide-to="0" aria-label="Account details">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                        <span class="ms-2">Account info</span>
+                                    </button>
+                                    <button type="button" class="btn btn-primary pe-2" data-bs-target="#carouselRegisterOrganizer" data-bs-slide-to="2" aria-label="Event details">
+                                        <span class="me-2">Event details</span>
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="p-5">
+                        <div class="card rounded-md shadow">
+                            <div class="card-body p-4">
+                                <h6 class="mb-4">Event details</h6>
+                                <label class="form-field mb-2">
+                                    <span class="d-block">{{ form.event_name.label }} {% if form.event_name.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.event_name class+='form-control' %}
+                                </label>
+
+                                <label class="form-field mb-2">
+                                    <span class="d-block">{{ form.event_date.label }} {% if form.event_date.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.event_date class+='form-select' %}
+                                </label>
+
+                                <label class="form-field mb-2">
+                                    <span class="d-block">{{ form.event_budget.label }} {% if form.event_budget.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.event_budget class+='form-control' %}
+                                </label>
+
+                                <label class="form-field mb-2">
+                                    <span class="d-block">{{ form.event_location.label }} {% if form.event_location.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.event_location class+='form-control' %}
+                                </label>
+
+                                <label class="form-field mb-2">
+                                    <span class="d-block">{{ form.guest_size.label }} {% if form.guest_size.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.guest_size class+='form-control' %}
+                                </label>
+
+                                <div class="cta d-flex justify-content-end gap-sm mt-3">
+                                    <button type="button" class="btn btn-secondary ps-2" data-bs-target="#carouselRegisterOrganizer" data-bs-slide-to="1" aria-label="Personal details">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                        <span class="ms-2">Personal info</span>
+                                    </button>
+                                    <button type="submit" class="btn btn-primary pe-2">
+                                        <span class="me-2">Create account</span>
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock body %}

@@ -4,19 +4,50 @@
 {% block title %} Hire {{ seller.user.full_name }} {{ seller.business_name }} {% endblock %}
 
 {% block body %}
-<h4>Hire {{ seller.user.full_name }} {{ seller.business_name }}</h4>
-<small class="btn-secondary rounded px-2">{{ seller.user.get_user_type_display }}</small>
 
-<form action="{{ request.path_info }}" method="POST">
-    {% csrf_token %}
-
-    {% for field in form.visible_fields %}
-    <div class="form-field mb-3">
-        {{ field.label_tag }}
-        {% render_field field class+="form-control" %}
+<div class="p-body">
+    <div class="mt-5 mb-4 text-center">
+        <h4>Hire {{ seller.user.full_name }} {{ seller.business_name }}</h4>
+        <small class="d-inline-block btn-secondary rounded px-2 mb-2">{{ seller.user.user_role }}</small>
+        {% for x in events %}
+        {% if seller.user in x.event_team.all %}
+        <div class="text-success">Already part of '{{ x.event_name }}' event team!</div>
+        {% endif %}
+        {% for c in x.contract_set.all %}
+        {% if c.is_pending and seller.user_id == c.contractee_id %}
+        <div class="text-success">Contract already sent for '{{ x.event_name }}' event!</div>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
     </div>
-    {% endfor %}
 
-    <button type="submit" class="btn btn-primary">Send contract</button>
-</form>
+    <form action="{{ request.path_info }}" method="POST">
+        {% csrf_token %}
+
+        <div class="form-field mb-3">
+            <label for="id_event">Event:</label>
+            <select name="event" id="id_event" class="form-select">
+                <option value="" hidden selected>---------</option>
+                {% for x in events %}
+                {% if not seller.user in x.event_team.all %}
+                <option value="{{ x.id }}">{{ x.event_name }} [Organizer: {{ x.organizer.user.full_name }}]</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-field mb-3">
+            {{ form.contract.label_tag }}
+            {% render_field form.contract class+="form-control" %}
+        </div>
+        <div class="form-field mb-3">
+            {{ form.comment.label_tag }}
+            <span class="hint text-muted">{{ form.comment.help_text }}</span>
+            {% render_field form.comment class+="form-control" %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Send contract</button>
+    </form>
+</div>
+
 {% endblock body %}

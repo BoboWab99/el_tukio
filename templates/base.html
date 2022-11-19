@@ -32,26 +32,22 @@
 		</symbol>
 	</svg>
 
-	<!-- C:\Users\arnau\AppData\Local\Programs\Python\Python310\Scripts\ -->
-
 	<!-- notification bar -->
-	<aside id="notifications" class="fixed-top">
+	<aside id="notifications" class="fixed-bottom">
 		{% for message in messages %}
 		<div class="session-message" style="display: none;">
 			<input type="hidden" name="message" value="{{ message }}">
 			<input type="hidden" name="alertType" value="{{ message.tags }}">
 		</div>
 		{% endfor %}
-		<div class="container"></div>
+		<div class="content"></div>
 	</aside>
 
 	{% block body %}{% endblock %}
 	{% block modals %} {% endblock %}
 
 	<!-- JQuery, Popper JS & Bootstrap JS -->
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-		crossorigin="anonymous" defer></script>
+	<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"

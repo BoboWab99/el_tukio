@@ -88,6 +88,12 @@
                                 </span>
                             </span>
                             {% endif %}
+                            {% if task.assigned_to %}
+                            <span class="text-muted">
+                                <i class="fa-solid fa-user"></i>
+                                <span data-value="due-date">{{ task.assigned_to }}</span>
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -101,6 +107,7 @@
 {% endblock content %}
 
 {% block modals %}
+
 <div class="modal fade" id="newTaskModal" tabindex="-1" role="dialog" aria-labelledby="newTaskModalTitle"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -166,13 +173,19 @@
                 <h5 class="modal-title" id="assignTaskModalTitle">Assign To:</h5>
             </div>
             <div class="modal-body">
+                {% if event.organizer.user_id != user.id %}
+                <a role="button" class="btn btn-outline-primary d-block mb-2" onclick="assignTaskTo({{ event.organizer.user_id }})">
+                    {{ event.organizer.user }}
+                    <span class="hint">{{ event.organizer.user.user_role }}</span>
+                </a>
+                {% endif %}
                 {% for member in event_team %}
+                {% if member.id != user.id %}
                 <a role="button" class="btn btn-outline-primary d-block mb-2" onclick="assignTaskTo({{ member.id }})">
                     {{ member.full_name }}
-                    {% if member.is_vendor %}
-                    <span class="hint">{{ member.vendor.business_name }}</span>
-                    {% endif %}
-                </a>                
+                    <span class="hint">{{ member.user_role }}</span>
+                </a>
+                {% endif %}        
                 {% endfor %}
             </div>
             <div class="modal-footer bg-light">
@@ -238,6 +251,9 @@
 {% endblock modals %}
 
 {% block scripts %}
+<script>
+    var EVENT_ID = {{ event.id|safe }}
+</script>
 <script src="{% static 'js/dom/tasks.js' %}" defer></script>
 <script src="{% static 'js/logic/tasks.js' %}" defer></script>
 {% endblock scripts %}

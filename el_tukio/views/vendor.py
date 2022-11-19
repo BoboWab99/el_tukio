@@ -15,7 +15,7 @@ from el_tukio.utils.main import print_form_values
 class Register(CreateView):
     model = User
     form_class = VendorRegForm
-    template_name = 'main/register/register.html'
+    template_name = 'main/register/vendor.html'
     extra_context = {'title': 'Vendor Registration'}
 
     def form_valid(self, form):
@@ -47,35 +47,6 @@ class BusinessProfileUpdate(UpdateView):
         form.save()
         messages.success(self.request, 'Business profile updated!')
         return redirect('vendor-profile')
-
-
-@method_decorator(vendor_required, name='dispatch')
-class BusinessGallery(CreateView):
-    form_class = VendorImageUploadForm
-    template_name = 'vendor/business-gallery.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["gallery"] = VendorImageUpload.objects.filter(vendor_id=self.request.user.id)
-        return context
-
-    # def get(self, request):
-        
-    #     pass
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST, request.FILES)
-        print(form)
-
-        if form.is_valid():
-            # file = VendorImageUpload(
-            #     vendor_id=self.request.user.pk,
-            #     image=form.cleaned_data['image'],
-            #     caption=form.cleaned_data['caption']
-            # )
-            # file.save()
-            messages.success(self.request, 'Form valid!')
-        # return render(request, self.template_name, {'form': form})
 
 
 @vendor_required

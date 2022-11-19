@@ -1,10 +1,22 @@
 :root {
-    --tk-dim-header: 70px;
+    --tk-dim-header: 60px;
+    --tk-dim-body-spacing-x: 1.5rem;
+    --tk-dim-chat-height: 55px;
 }
 
-body {
+/* body {
     padding: 0 2rem 4rem;
     text-align: center;
+} */
+
+html {
+    font-size: 15px;
+}
+
+html, 
+body {
+    width: 100%;
+    height: 100%;
 }
 
 a {
@@ -18,13 +30,37 @@ textarea {
 
 form {
     text-align: left;
-    max-width: 500px;
+    max-width: 570px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .header {
     height: var(--tk-dim-header);
+    padding-left: var(--tk-dim-body-spacing-x);
+    padding-right: var(--tk-dim-body-spacing-x);
+}
+
+.ps-body {
+    padding-left: var(--tk-dim-body-spacing-x);
+}
+
+.pe-body {
+    padding-right: var(--tk-dim-body-spacing-x);
+}
+
+.px-body {
+    padding-left: var(--tk-dim-body-spacing-x);
+    padding-right: var(--tk-dim-body-spacing-x);
+}
+
+.py-body {
+    padding-top: var(--tk-dim-body-spacing-x);
+    padding-bottom: var(--tk-dim-body-spacing-x);
+}
+
+.p-body {
+    padding: var(--tk-dim-body-spacing-x);
 }
 
 .logo {
@@ -37,6 +73,10 @@ form {
 
 .flex-shrink-0 {
     flex-shrink: 0 !important;
+}
+
+.gap-xsm {
+    gap: 0.3rem !important;
 }
 
 .gap-sm {
@@ -55,6 +95,12 @@ form {
     gap: 3rem !important;
 }
 
+.bs-focus {
+    border-color: #86b7fe !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%) !important;
+}
+
 .rounded-sm {
     border-radius: 0.5rem !important;
 }
@@ -65,6 +111,10 @@ form {
 
 .rounded-lg {
     border-radius: 1.5rem !important;
+}
+
+.alert-dismissible {
+    padding-right: 4.5rem;
 }
 
 .circle-sm {
@@ -78,6 +128,11 @@ form {
 
 .cursor-pointer {
     cursor: pointer !important;
+}
+
+.form-field {
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
 .flex-items-equal > *{
@@ -104,6 +159,78 @@ form {
     height: 1.3em;
 }
 
+/* Custom simple scrollbar */
+
+/* Firefox */
+.tk-scrollbar {
+    scrollbar-width: thin;
+    scroll-margin-top: 1rem;
+    scroll-margin-bottom: 1rem;
+    scrollbar-color: rgb(211, 211, 212) rgb(255 255 255);
+}
+
+/* Chrome, Edge, and Safari */
+.tk-scrollbar::-webkit-scrollbar {
+    width: 12px;
+}
+
+.tk-scrollbar::-webkit-scrollbar-track {
+    margin: 0.5rem 0;
+    background: #829ebb;
+}
+
+.tk-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgb(211, 211, 212);
+    border-radius: 2rem;
+    border: 3px solid #829ebb;
+}
+
+/* layout */
+
+.layout-dashboard {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    grid-template-rows: var(--tk-dim-header) calc(100% - var(--tk-dim-header));
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.layout-dashboard-body>*,
+.layout-dashboard-body>*>*,
+.layout-dashboard-body>*>*>* {
+    height: 100%;
+}
+
+.layout-dashboard-content {
+    overflow-y: auto;
+}
+
+.layout-chat .layout-dashboard-content {
+    --nav-size: 84px;
+    overflow: hidden;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    grid-template-rows: var(--nav-size) calc(100% - var(--nav-size));
+    padding-bottom: calc(0.5rem + var(--tk-dim-chat-height));
+}
+
+/* vendors */
+
+.filter-rate-choice>input:checked + label {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.card-search-result img {
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    height: 145px;
+    object-fit: cover;
+}
 
 /* tasks */
 
@@ -142,7 +269,22 @@ form {
 
 /* chat */
 
+.chat-form-wrapper {
+    height: var(--tk-dim-chat-height);
+}
+
+.layout-chat .chat-inner>*,
+.layout-chat .chat-inner>*>*,
+.layout-chat .chat-inner>*>*>* {
+    height: 100%;
+}
+
+.messages-wrapper {
+    overflow-y: auto;
+}
+
 .chat-form-wrapper .alert {
+    margin: 0 1rem 0.5rem;
     box-shadow: inset 0 2px 4px rgba(255 255 255 / 0.8), -1px 2px 6px 2px rgba(0 0 0 / 0.3);
 }
 
@@ -158,6 +300,10 @@ form {
     box-shadow: 0 2px 4px rgba(0 0 0 / 0.2);
 }
 
+.messages-inner>.chat-message {
+    max-width: 80%;
+}
+
 .chat-message-inner {
     border-radius: 0.5rem !important;
     box-shadow: 0 1px rgb(0 0 0 / 20%);
@@ -167,7 +313,10 @@ form {
     margin-bottom: 0.25rem;
     margin-left: -0.5rem;
     margin-right: -0.5rem;
-    opacity: 0.85;
+}
+
+.chat-message .chat-message-inner>* {
+    opacity: 0.75;
 }
 
 .chat-message.outgoing {
@@ -220,6 +369,19 @@ form {
     background-color: rgba(255 255 255 / 1);
 }
 
+
+/* editorjs */
+
+.editorjs {
+    --default-max-width: 650px;
+    --options-width: 65px;
+    padding-left: var(--options-width);
+    max-width: calc(var(--options-width) + var(--default-max-width));
+}
+
+.codex-editor__redactor {
+    padding-bottom: 50px !important;
+}
 
 /* calendar */
 
