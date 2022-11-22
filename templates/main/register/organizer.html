@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load widget_tweaks %}
 
 {% block title %}Create account | Organizer | ElTukio{% endblock title %}
@@ -7,7 +8,7 @@
 
 <div class="p-body">
     <h5 class="text-center mb-0 mt-2"><a href="{% url 'home' %}">ElTukio</a> | Create account | Organizer</h5>
-    <form method="post">
+    <form method="post" autocomplete="off">
         {% csrf_token %}
 
         <div id="carouselRegisterOrganizer" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-touch="false" data-bs-interval="false">
@@ -66,6 +67,61 @@
                                 <label class="form-field">
                                     <span class="d-block">{{ form.email.label }} {% if form.email.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
                                     {% render_field form.email class+='form-control' %}
+                                </label>
+
+                                <label class="form-field">
+                                    <span class="d-block">{{ form.account_type.label }} {% if form.account_type.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.account_type class+='form-select' %}
+                                </label>
+                                
+                                <label class="form-field d-none">
+                                    <span class="d-block">{{ form.business_name.label }} {% if form.business_name.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.business_name class+='form-control' autocomplete=False %}
+                                </label>
+                                
+                                <label class="form-field d-none">
+                                    <span class="d-block">Location <span class="hint">Road/Street name</span> {% if form.route.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.route class+='form-control' autocomplete=False %}
+                                </label>
+                                
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.neighbourhood.label }} {% if form.neighbourhood.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.neighbourhood class+='form-control' %}
+                                </label>
+
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.city.label }} {% if form.city.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.city class+='form-control' %}
+                                </label>
+
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.county.label }} {% if form.county.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.county class+='form-control' %}
+                                </label>
+
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.country.label }} {% if form.country.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.country class+='form-control' %}
+                                </label>
+
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.postal_code.label }} {% if form.postal_code.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.postal_code class+='form-control' %}
+                                </label>
+
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.longitude.label }} {% if form.longitude.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.longitude class+='form-control' %}
+                                </label>
+
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.latitude.label }} {% if form.latitude.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.latitude class+='form-control' %}
+                                </label>
+                                
+                                <label class="form-field d-non">
+                                    <span class="d-block">{{ form.maps_url.label }} {% if form.maps_url.field.required %} <small class="text-danger">[required]</small> {% endif %}</span>
+                                    {% render_field form.maps_url class+='form-control' %}
                                 </label>
 
                                 <div class="cta d-flex justify-content-end gap-sm mt-3">
@@ -133,3 +189,13 @@
 </div>
 
 {% endblock body %}
+
+{% block scripts %}
+
+<script src="{% static 'js/logic/test.js' %}"></script>
+
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key|safe }}&libraries=places&callback=initMap">
+</script>
+
+{% endblock scripts %}

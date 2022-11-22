@@ -14,6 +14,7 @@ from django.db import transaction
 import json
 import datetime as DT
 
+from setup.settings import GOOGLE_API_KEY
 from el_tukio.forms import *
 from el_tukio.models import *
 from el_tukio.utils.decorators import *
@@ -24,7 +25,10 @@ from el_tukio.utils.messages import *
 class Register(CreateView):
     form_class = OrganizerRegForm
     template_name = 'main/register/organizer.html'
-    extra_context = {'title': 'Event organizer Registration'}
+    extra_context = {
+        'title': 'Event organizer Registration',
+        'google_api_key': GOOGLE_API_KEY,
+    }
 
     def form_valid(self, form):
         print_form_values(form)

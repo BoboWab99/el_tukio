@@ -22,6 +22,7 @@ class Location(models.Model):
     country = models.CharField(max_length=255)
     longitude = models.FloatField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
+    maps_url = models.CharField(max_length=1024, blank=True, null=True)
 
     def __string__(self):
         return f'{self.route}, {self.city}, {self.country}'
@@ -40,7 +41,7 @@ class User(AbstractUser):
         PERSONAL = 1, _('Personal')
         ORGANIZATION = 2, _('Organization')
         
-        __empty__ = _('(Unkown)')
+        __empty__ = _('--------------')
 
     user_type = models.SmallIntegerField(blank=True, null=True, choices=UserType.choices)
     phone_number = PhoneNumberField(blank=True, null=True, unique=True)

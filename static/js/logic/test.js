@@ -1,77 +1,150 @@
 // test google maps api
 
+const routeField = document.querySelector('#id_route')
+const orgField = document.querySelector('#id_business_name')
+const accTypeElm = document.querySelector('#id_account_type')
+
+accTypeElm.addEventListener('change', () => {
+    const accountType = selectedText(accTypeElm)
+    const ffRoute = routeField.closest('.form-field')
+    const ffOrg = orgField.closest('.form-field')
+
+    if (accountType == 'Personal') {
+        if (!ffOrg.classList.contains('d-none')) {
+            ffOrg.classList.add('d-none')
+        }
+    }
+    if (accountType == 'Organization') {
+        if (ffOrg.classList.contains('d-none')) {
+            ffOrg.classList.remove('d-none')
+        }
+    }
+    if (ffRoute.classList.contains('d-none')) {
+        ffRoute.classList.remove('d-none')
+    }
+})
+
+/**
+ * Returns select element selected text
+ * @param {HTMLSelectElement} element select element
+ */
+function selectedText(element) {
+    return element.options[element.selectedIndex].text
+}
+
+
 function initMap() {
-    const locationPicker = document.getElementById('locationPicker')
-    const map_options = {
+    const autocompleteRoute = new google.maps.places.Autocomplete(routeField, {
         componentRestrictions: { country: 'ke' },
         fields: ['address_components', 'geometry', 'name', 'url'],
         strictBounds: false,
         types: ['address'],     // options: geocode, address, establishment
-    }
-    const autocomplete = new google.maps.places.Autocomplete(locationPicker, map_options)
-    autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace()
-        if (!place.geometry || !place.geometry.location) {
-            // User entered the name of a Place that was not suggested and
-            // pressed the Enter key, or the Place Details request failed.
-            window.alert(`No details available for input: ' ${place.name}'`)
-            return
-        }
+    })
 
-        const geocoder = new google.maps.Geocoder()
-        const address = locationPicker.value
+    const autocompleteOrg = new google.maps.places.Autocomplete(orgField, {
+        componentRestrictions: { country: 'ke' },
+        fields: ['address_components', 'geometry', 'name', 'url'],
+        strictBounds: false,
+        types: ['establishment'],
+    })
 
-        geocoder.geocode({ 'address': address }, function (results, status) {
-            if (status == google.maps.GeocoderStatus.OK) {
-                let latitude = results[0].geometry.location.lat()
-                let longitude = results[0].geometry.location.lng()
-                console.log(`latitude: ${latitude}`)
-                console.log(`longitude: ${longitude}`)
+    const autos = []
+    autos.push(autocompleteRoute)
+    autos.push(autocompleteOrg)
+
+    autos.forEach(element => {
+        element.addListener('place_changed', () => {
+            const place = element.getPlace()
+            if (!place.geometry || !place.geometry.location) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                notifyError(`No details available for input: ' ${place.name}'`, false)
+                return
             }
+
+            let geo = null
+            const geocoder = new google.maps.Geocoder()
+            // const accountType = accTypeElm.options[accTypeElm.selectedIndex].text
+
+            const routeChanged = () => autos.indexOf(element) == 0
+            const orgChanged = () => autos.indexOf(element) == 1
+
+            if (routeChanged()) {
+                console.log('changed: route field!')
+                geo = routeField.value
+                routeField.value = place.name
+            }
+            if (orgChanged()) {
+                console.log('changed: org name field!')
+                geo = orgField.value
+                orgField.value = place.name
+            }
+
+            geocoder.geocode({ 'address': geo }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    let latitude = results[0].geometry.location.lat()
+                    let longitude = results[0].geometry.location.lng()
+                    document.querySelector('#id_latitude').value = latitude
+                    document.querySelector('#id_longitude').value = longitude
+                }
+            })
+
+            let address1 = ''
+            let postcode = ''
+
+            for (const component of place.address_components) {
+                const componentType = component.types[0]
+
+                switch (componentType) {
+                    // case 'street_number': {
+                    //     address1 = `${component.long_name} ${address1}`
+                    //     break
+                    // }
+                    case 'route': {
+                        address1 = component.long_name
+                        break
+                    }
+                    case 'postal_code': {
+                        postcode = `${component.long_name}${postcode}`
+                        break
+                    }
+                    case 'postal_code_suffix': {
+                        postcode = `${postcode}-${component.long_name}`
+                        break
+                    }
+                    case 'sublocality_level_1': {
+                        document.querySelector('#id_neighbourhood').value = component.long_name
+                        break
+                    }
+                    case 'locality': {
+                        document.querySelector('#id_city').value = component.long_name
+                        break
+                    }
+                    case 'administrative_area_level_1': {
+                        document.querySelector('#id_county').value = component.short_name
+                        break
+                    }
+                    case 'country':
+                        document.querySelector('#id_country').value = component.long_name
+                        break
+                }
+            }
+
+            // addressField.value = place.name
+            if (orgChanged()) {
+                routeField.value = address1
+            }
+            document.querySelector('#id_postal_code').value = postcode
+
+            if (routeChanged() && selectedText(accTypeElm) == 'Organization') {
+                document.querySelector('#id_maps_url').value = document.querySelector('#id_maps_url').value
+            } else {
+                document.querySelector('#id_maps_url').value = place.url
+            }
+    
+            console.log(place.url)
+            console.log('\n\n', place.address_components, '\n\n')
         })
-
-        let address1 = ''
-        let postcode = ''
-
-        for (const component of place.address_components) {
-            const componentType = component.types[0]
-
-            switch (componentType) {
-                case 'street_number': {
-                    address1 = `${component.long_name} ${address1}`
-                    break
-                }
-                case 'route': {
-                    address1 += component.short_name
-                    break
-                }
-                case 'postal_code': {
-                    postcode = `${component.long_name}${postcode}`
-                    break
-                }
-                case 'postal_code_suffix': {
-                    postcode = `${postcode}-${component.long_name}`
-                    break
-                }
-                case 'locality':
-                    document.getElementById('city').value = component.long_name
-                    break
-                case 'administrative_area_level_1': {
-                    document.getElementById('state').value = component.short_name
-                    break
-                }
-                case 'country':
-                    document.getElementById('country').value = component.long_name
-                    break
-            }
-        }
-
-        locationPicker.value = place.name
-        document.getElementById('postcode').focus()
-
-        console.log(place.icon)
-        console.log(place.url)
-        console.log('\n\n', place.address_components, '\n\n')
     })
 }
 

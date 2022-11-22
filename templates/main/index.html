@@ -12,7 +12,7 @@
     <a href="{% url 'register' %}" class="btn btn-primary mb-3">Register</a>
     <a href="{% url 'login' %}" class="btn btn-success mb-3 ms-2">Login</a>
 
-    <form method="post" autocomplete="off">
+    {% comment %} <form method="post" autocomplete="off">
         <label class="form-field mb-3">
             <span for="d-block">Location:</span>
             <input type="text" name="location_picker" id="locationPicker" class="form-control" autofocus required autocomplete="off">
@@ -33,7 +33,7 @@
             <span class="d-block">Country/Region</span>
             <input type="text" class="form-control" name="country" id="country">
         </label>
-    </form>
+    </form> {% endcomment %}
 
     {% comment %} <h5>Editor</h5>
     <div id="editorjs" class="editorjs border rounded"></div>
@@ -44,10 +44,10 @@
 
 {% block scripts %}
 {% include 'components/editorjs-links.html' %}
-<script src="{% static 'js/logic/test.js' %}"></script>
+{% comment %} <script src="{% static 'js/logic/test.js' %}"></script>
 <script async
     src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key|safe }}&libraries=places&callback=initMap">
-</script>
+</script> {% endcomment %}
 
 {% comment %} <script>
     var GOOGLE_API_KEY = '{{ google_api_key|safe }}'

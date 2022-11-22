@@ -70,6 +70,8 @@ class OrganizerRegForm(UserCreationForm):
     last_name = forms.CharField(required=False)
     email = forms.EmailField(required=True)
     phone_number = forms.CharField(required=True)
+    account_type = forms.ChoiceField(required=True, choices=User.AccountType.choices)
+    
     event_name = forms.CharField(required=True)
     event_date = forms.DateField(
         required=True,
@@ -91,7 +93,8 @@ class OrganizerRegForm(UserCreationForm):
     country = forms.CharField(required=False)
     postal_code = forms.CharField(required=False)
     longitude = forms.FloatField(required=False)
-    laitude = forms.FloatField(required=False)
+    latitude = forms.FloatField(required=False)
+    maps_url = forms.CharField(required=False)
 
     class Meta(UserCreationForm.Meta):
         model = User
